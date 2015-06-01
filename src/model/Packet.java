@@ -1,23 +1,29 @@
 
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Packet {
+public class Packet implements Serializable {
     
     private String sender;
     private String receiver;
-    private ArrayList<String> data;
     
-    // lastMessageIndex == -1 --> sender Client just connected to Server
-    // lastmessageIndex == -2 --> sender Client just disconnected from Server
-    private int lastMessageIndex;
+    // data == null --> Client ask Server new messages
+    private ArrayList<Message> data;
     
-    public Packet (String sender, String receiver, ArrayList<String> data, int lastMessageIndex) {
+    // action == 1 --> sender Client connect to Server
+    // action == 2 --> sender Client disconnect from Server
+    // action == 3 --> sender Client joined the server correctly
+    // action == 4 --> sender Client hasn't joined the server correctly: duplicate name of clients
+    // action == 5 --> sender Client hasn't joined the server
+    private int action;
+    
+    public Packet (String sender, String receiver, ArrayList<Message> data, int action) {
         this.sender = sender;
         this.receiver = receiver;
         this.data = data;
-        this.lastMessageIndex = lastMessageIndex;
+        this.action = action;
     }
 
     public String getSender() {
@@ -28,11 +34,11 @@ public class Packet {
         return receiver;
     }
 
-    public ArrayList<String> getData() {
+    public ArrayList<Message> getData() {
         return data;
     }
 
-    public int getLastMessageIndex() {
-        return lastMessageIndex;
+    public int getAction() {
+        return action;
     }
 }

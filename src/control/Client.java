@@ -13,7 +13,7 @@ public class Client {
     
     private String clientName;
     private String serverName;
-    int port;
+    private int port;
     
     private Socket client = null;
     
@@ -40,21 +40,17 @@ public class Client {
             ObjectOutputStream out = new ObjectOutputStream(outToServer);
 
             out.writeObject(packet);
-
-            out.close();
             
             // from server:
             InputStream inFromServer = client.getInputStream();            
             ObjectInputStream in = new ObjectInputStream(inFromServer);
             
             Packet p = (Packet) in.readObject();
-            
-            in.close();
-            
+                        
             return p;
-            //client.close(); 
         }
         catch (IOException | ClassNotFoundException ex) {
+            ex.printStackTrace();
             return null;
         }
     }
@@ -67,6 +63,18 @@ public class Client {
         catch (IOException ex) {
             return false;
         }
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public int getPort() {
+        return port;
     }
     
 }

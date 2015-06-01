@@ -9,18 +9,23 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import model.Message;
 
 public class Server extends Thread {
     
     private ServerSocket serverSocket;
-    HashMap<String, String> idip;
-    ArrayList<String> messages;
+    
+    // key: clientName ; value: clientIp
+    private HashMap<String, String> idip;
+    
+    // Key: clientName ; value: message to client
+    private HashMap<String, ArrayList<Message>> msgToSend;
 
     public Server(int port) throws IOException {
         serverSocket = new ServerSocket(port);
         
         this.idip = new HashMap<>();
-        this.messages = new ArrayList<>();
+        this.msgToSend = new HashMap<>();
     }
 
     @Override
@@ -32,17 +37,21 @@ public class Server extends Thread {
                 ObjectInputStream in = new ObjectInputStream(server.getInputStream());
                 
                 // Packet from sender
-                Packet data = (Packet) in.readObject();
+                Packet data = (Packet) in.readObject();                              
                 
-                Packet r = this.packetManager(data, server.getInetAddress().toString());                
+                Packet r = this.packetManager(data, server.getInetAddress().toString());
                 
+                // Packet to sender
                 ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());
-                out.writeObject(r);
+                out.writeObject(r);                               
                 
                 server.close();
+                in.close();
+                out.close();
             }
             catch (IOException e) {
                 System.err.println("ERROR: Input/Output Exception");
+                e.printStackTrace();
             }
             catch (ClassNotFoundException ex) {
                 System.err.println("ERROR: Class Not Found!");
@@ -53,26 +62,48 @@ public class Server extends Thread {
     private Packet packetManager (Packet p, String ip) { 
         // return Packet to p.getReceiver()        
         
-        switch (p.getLastMessageIndex()) {
-            case -1:
-                // p.getSender() join conversation
-                this.idip.put(p.getSender(), ip);
-                return null;
-            case -2:
+        switch (p.getAction()) {
+            case 1:                
+                if (this.idip.containsKey(p.getSender())) {
+                   // client with the same name already exist
+                   return new Packet("SERVER", p.getSender(), null, 4);
+                }
+                else {
+                    // p.getSender() join conversation
+                    this.idip.put(p.getSender(), ip);
+                    return new Packet("SERVER", p.getSender(), null, 3);
+                }
+            case 2:
                 // p.getSender() leave conversation
                 this.idip.remove(p.getSender());
                 return null;
-            default:
-                if (p.getData() != null) {
-                    // p.getSender() send new messages
-                    this.messages.addAll(p.getData());
+            default:                
+                if (this.idip.get(p.getSender()).equals(ip)) {
+                    // sender-name match with ip
+                    if (p.getData() != null) {
+                        // p.getSender() send new messages
+                        for (Message m : p.getData()) {
+                            // new messages are stored in 'msgToSend' and wait 'receiver'
+                            for (String receiver : m.getReceivers()) {                                
+                                if (this.idip.containsKey(receiver)) {
+                                    // receiver exists
+                                    ArrayList<Message> msgs = this.msgToSend.get(receiver);
+                                    msgs.add(m);
+
+                                    this.msgToSend.put(receiver, msgs);
+                                }                                
+                            }
+                        }                                            
+                    }
+                    // send old messages to p.getSender()
+                    ArrayList<Message> oldMessages = this.msgToSend.get(p.getSender());
+                    
+                    return new Packet("SERVER", p.getSender(), oldMessages, 0);
                 }
-                
-                ArrayList<String> oldMessages = new ArrayList<>();                
-                for (int i = p.getLastMessageIndex()+1; i < this.messages.size() - p.getData().size(); i++) {
-                    oldMessages.add(this.messages.get(i));
+                else {
+                    // sender-name doesen't match with ip
+                    return new Packet("SERVER", p.getSender(), null, 5);
                 }
-                return new Packet(p.getSender(), p.getReceiver(), oldMessages, 0);
         }
     }
 }
