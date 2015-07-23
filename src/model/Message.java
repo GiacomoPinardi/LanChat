@@ -2,17 +2,16 @@
 package model;
 
 import java.io.Serializable;
-import java.util.HashSet;
 
 public class Message implements Serializable {
     
     private String information;
     private String sender;
-    private HashSet<String> receivers;
+    private String receiver;
 
-    public Message(String sender, HashSet<String> receivers, String information) {        
+    public Message(String sender, String receiver, String information) {        
         this.sender = sender;
-        this.receivers = receivers;
+        this.receiver = receiver;
         this.information = information;
     }    
 
@@ -20,8 +19,8 @@ public class Message implements Serializable {
         return this.sender;
     }
     
-    public HashSet<String> getReceivers () {
-        return this.receivers;
+    public String getReceiver () {
+        return this.receiver;
     }
     
     public String getInformation() {

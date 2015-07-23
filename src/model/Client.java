@@ -1,5 +1,5 @@
 
-package control;
+package model;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +33,23 @@ public class Client {
         }
     }
     
+    public int join () {
+        Packet response = this.sendReceive(new Packet(this.clientName, "SERVER", null, null, 1));
+        
+        if (response.getAction() == 3) {
+            // succesful
+            return 0;
+        }
+        else if (response.getAction() == 4) {
+            // duplicate name
+            return 1;
+        }
+        else {
+            // unknown error
+            return 2;
+        }
+    }
+    
     public Packet sendReceive (Packet packet) {        
         try {
             // to server:
@@ -50,9 +67,15 @@ public class Client {
             return p;
         }
         catch (IOException | ClassNotFoundException ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
             return null;
         }
+    }
+    
+    public boolean leave () {
+        Packet response = this.sendReceive(new Packet(this.clientName, "SERVER", null, null, 2));
+        
+        return response.getAction() == 6;
     }
     
     public boolean disconnect () {
