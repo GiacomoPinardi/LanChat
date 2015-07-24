@@ -24,24 +24,35 @@ public class ClientManager extends Thread {
     
     @Override
     public void run () {
-        while (GIC.isOnline()) {
+        while (GIC.isOnline()) {        
             // here client will ask server for packet and with 'updateWindow' the new packet will be sent
             
-            // client connect to server
-            if (this.client.connect()) {
-                GIC.setConsoleText(true, "Client connected");
+            // if there is at least one packet to send
+            if (forServer.size() != 0) {
+                
+                // client connect to server
+                // REMINDER: if no packets aren't send client MUST disconnect: "client.disconnect();"
+                if (this.client.connect()) {
+                    GIC.setConsoleText(true, "Client connected");                        
+
+                    // first optimization
+                    this.forServer = Worker.packetOptimizer(forServer, client.getClientName());
+
+                    // client send packet to server and store response from server
+                    Packet response = this.client.sendReceive(this.forServer.get());
+
+                    if (response != null) {
+                        this.forClient.add(response);
+
+                        // client manage packet to/from server
+                        this.packetManager();
+                    }
+                }
+                else {
+                    GIC.setConsoleText(false, "Connection error!");
+                }
             }
-            else {
-                GIC.setConsoleText(false, "Connection error!");
-            }
             
-            // client send packet to server and store response from server
-            Packet response = this.client.sendReceive(this.forServer.get());
-            
-            this.forClient.add(response);
-            
-            // client manage packet to/from server
-            this.packetManager();
             
             try {
                 Thread.sleep(500);
@@ -87,11 +98,15 @@ public class ClientManager extends Thread {
         return false;
     }
     
-    public void packetManager () {
-        // send packet to GraphicInterfaceClient
+    private void packetManager () {        
+        // second optimization
+        this.forClient = Worker.packetOptimizer(forClient, client.getClientName());
+        
+        // send packet to GraphicInterfaceClient        
+        GIC.updateWindow(forClient);        
+        
         // get packet from GraphicInterfaceClient
-        
-        
+        forServer.addAll(GIC.getPacketForServer());
     }
     
 }

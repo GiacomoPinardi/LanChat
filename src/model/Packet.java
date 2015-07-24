@@ -3,7 +3,7 @@ package model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.TreeSet;
 
 public class Packet implements Serializable {
     
@@ -13,10 +13,10 @@ public class Packet implements Serializable {
     // data == null --> Client ask Server new messages
     private ArrayList<Message> data;
     
-    HashSet<String> onlinePeople;
+    TreeSet<String> onlinePeople;
     
     // action == -1 --> unknown error
-    // action == 0 --> ok
+    // action == 0 --> normal packet
     // action == 1 --> sender Client connect to Server
     // action == 2 --> sender Client disconnect from Server
     // action == 3 --> sender Client joined the server correctly
@@ -26,7 +26,7 @@ public class Packet implements Serializable {
     // action == 7 --> client ask server onlinePeople
     private int action;
     
-    public Packet (String sender, String receiver, ArrayList<Message> data, HashSet<String> onlinePeople, int action) {
+    public Packet (String sender, String receiver, ArrayList<Message> data, TreeSet<String> onlinePeople, int action) {
         this.sender = sender;
         this.receiver = receiver;
         this.data = data;
@@ -50,7 +50,7 @@ public class Packet implements Serializable {
         return action;
     }
     
-    public HashSet<String> getOnlinePeople () {
+    public TreeSet<String> getOnlinePeople () {
         return onlinePeople;
     }
 }

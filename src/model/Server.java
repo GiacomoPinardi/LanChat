@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.TreeSet;
 
 public class Server extends Thread {
     
@@ -41,13 +41,13 @@ public class Server extends Thread {
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 
                 // Packet from sender
-                Packet data = (Packet) in.readObject();                              
+                Packet data = (Packet) in.readObject();
                 
                 Packet r = this.packetManager(data, socket.getInetAddress().toString());
                 
                 // Packet to sender
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                out.writeObject(r);                               
+                out.writeObject(r);
                 
                 socket.close();
                 in.close();
@@ -58,10 +58,9 @@ public class Server extends Thread {
             }
             catch (IOException IOE) {
                 System.err.println("ERROR: Input/Output Exception");
-                IOE.printStackTrace();
             }
             catch (ClassNotFoundException ex) {
-                System.err.println("ERROR: Class Not Found!");
+                System.err.println("ERROR: Class Not Found Exception");
             }
         }        
     }
@@ -111,7 +110,7 @@ public class Server extends Thread {
                     // send old messages to p.getSender()
                     ArrayList<Message> oldMessages = this.msgToSend.get(p.getSender());
                     
-                    HashSet<String> onlinePeople = null;
+                    TreeSet<String> onlinePeople = null;
                     
                     // client ask for online people
                     if (p.getAction() == 7) {

@@ -4,15 +4,22 @@ package view;
 import control.Worker;
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.TreeSet;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import model.Conversation;
 import model.Message;
 import model.Packet;
+import model.PacketQueue;
 
 public class GraphicInterfaceClient extends javax.swing.JFrame {
     
+    // String: name ; Conversation: conversations
     private HashMap<String, Conversation> conversations;
+    // String: name ; jTextArea: chat
+    private HashMap<String, JTextArea> chats;
+    
+    private PacketQueue forServer;
     
     private boolean online;
     
@@ -21,6 +28,14 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         
         this.conversations = new HashMap<>();
+        
+        this.chats = new HashMap<>();   
+        JTextArea jta = new JTextArea();
+        jta.setEditable(false);
+        chats.put("All", jta);        
+        jTabbedPane1.addTab("All", chats.get("All"));
+        
+        this.forServer = new PacketQueue();
         
         this.online = true;
     }
@@ -37,9 +52,6 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
         jTabbedPane1 = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jTextField1 = new javax.swing.JTextField();
@@ -56,24 +68,6 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         jTabbedPane1.setToolTipText("");
         jTabbedPane1.setFocusable(false);
         jTabbedPane1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-
-        jTextArea1.setEditable(false);
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane2.setViewportView(jTextArea1);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 395, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
-        );
-
-        jTabbedPane1.addTab("All", jPanel1);
 
         jButton1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
         jButton1.setText("Quit conversation");
@@ -150,44 +144,72 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
         int r = JOptionPane.showConfirmDialog(rootPane, "Are you sure?", "Quit?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         
-        // need a boolean variable that other class check to ensure that client interface is on
-        
+        // 'online' is a boolean variable that other class check to ensure that client interface is on        
         if (r == 0) {
             this.online = false;
             this.dispose();
         }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
      
-    public void updateWindow (Packet p) {
-        // get list of online people at the moment
-        if (p.getOnlinePeople() != null) {
-            jList1.setListData(Worker.SetToVector(p.getOnlinePeople()));
+    public void updateWindow (PacketQueue pq) {
+        // contains all online people from packets
+        TreeSet<String> ts = new TreeSet<>();
+        
+        for (Packet p : pq.getAll()) {
+            // get list of online people at the moment
+            if (p.getOnlinePeople() != null) {
+                ts.addAll(p.getOnlinePeople());
+            }
+
+            // new messages saved in conversations
+            for (Message m : p.getData()) {
+
+                String sender = m.getSender();
+                Conversation c;
+
+                if (conversations.containsKey(sender)) {
+                    // exists conversation
+                    c = conversations.get(sender);                                
+                }
+                else {
+                    // new conversation
+                    c = new Conversation(sender);
+                    jTabbedPane1.add(sender, new JTextArea());
+
+                    //jTabbedPane1.get
+                    // TO DO:
+
+
+                }
+                // !!!!!!!!!!!!!!!!!!     manually update the chat shown
+                
+                c.addMsg(m);
+                conversations.put(sender, c);
+            }
         }
         
-        // new messages saved in conversations
-        for (Message m : p.getData()) {
-            
-            String sender = m.getSender();
-            Conversation c;
-            
-            if (conversations.containsKey(sender)) {
-                // yet in conversation
-                c = conversations.get(sender);                                
-            }
-            else {
-                // new conversation
-                c = new Conversation(sender);
-                jTabbedPane1.add(sender, new JTextArea());
-                
-                
-                
-                // first make server
-                
-                
-            }
-            c.addMsg(m);
-            conversations.put(sender, c);
+        // all online people are showed
+        jList1.setListData(Worker.SetToVector(ts));
+        
+    }
+    /*
+    private void updateChats () {
+        // all title of the current shown conversation are stored in 'title'
+        ArrayList<String> title = new ArrayList<>();
+        for (int i = 0; i < jTabbedPane1.getTabCount(); i++) {
+            title.add(jTabbedPane1.getTitleAt(i));
         }
+        
+        for (String chatName : conversations.keySet()) {
+            // there isn't a chat for the new conversation
+            if (!title.contains(chatName)) {
+                
+            }
+        }
+    }*/
+    
+    public PacketQueue getPacketForServer () {
+        return this.forServer;
     }
     
     public void setConsoleText (boolean type, String text) {
@@ -215,11 +237,8 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }

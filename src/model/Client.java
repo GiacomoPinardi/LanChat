@@ -67,14 +67,14 @@ public class Client {
             return p;
         }
         catch (IOException | ClassNotFoundException ex) {
-            //ex.printStackTrace();
+            ex.printStackTrace();
             return null;
         }
     }
     
     public boolean leave () {
         Packet response = this.sendReceive(new Packet(this.clientName, "SERVER", null, null, 2));
-        
+                
         return response.getAction() == 6;
     }
     

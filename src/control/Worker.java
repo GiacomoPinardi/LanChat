@@ -1,10 +1,17 @@
 
 package control;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.regex.PatternSyntaxException;
+import model.Message;
+import model.Packet;
+import model.PacketQueue;
 
 public class Worker {
     
@@ -59,12 +66,63 @@ public class Worker {
         return name;
     }
     
-    public static Vector SetToVector (HashSet<String> hs) {
+    public static Vector SetToVector (Set<String> hs) {
         Vector<String> v = new Vector<>();
         for (String s : hs) {
             v.add(s);
         }
         return v;
+    }
+    
+    public static PacketQueue packetOptimizer (PacketQueue pq, String clientName) {
+        // optimize the packets making them easier to send
+        // every message is put in a hashmap containing sender and messages
+        
+        HashMap<String, ArrayList<Message>> container = new HashMap<>();
+        TreeSet<String> onlinePeople = new TreeSet<>();
+        
+        PacketQueue result = new PacketQueue();
+        
+        for (Packet p : pq.getAll()) {
+            onlinePeople.addAll(p.getOnlinePeople());
+            
+            // if the packet is normal
+            if (p.getAction() == 0) {
+                for (Message m : p.getData()) {
+                    ArrayList<Message> tmp;
+                    
+                    if (container.containsKey(m.getSender())) {
+                        tmp = container.get(m.getSender());
+                    }
+                    else {
+                        tmp = new ArrayList<>();
+                    }
+                    tmp.add(m);
+                    container.put(m.getSender(), tmp);
+                }
+            }
+            else {
+                result.add(p);
+            }
+        }
+        
+        boolean first = true;
+        
+        // for every chat is created a new packet
+        for (String name : container.keySet()) {
+            if (!first) {
+                onlinePeople = null;
+            }
+            else {
+                first = false;
+            }
+            // only in the first packet will be send the online people
+            Packet tmp = new Packet(name, clientName, container.get(name), onlinePeople, 0);
+            
+            result.add(tmp);
+        }
+        
+        return result;
     }
         
 }
