@@ -77,6 +77,7 @@ public class Server extends Thread {
                 else {
                     // p.getSender() join conversation
                     this.idip.put(p.getSender(), ip);
+                    this.msgToSend.put(p.getSender(), new ArrayList<Message>());
                     return new Packet("SERVER", p.getSender(), null, null, 3);
                 }
             case 2:
@@ -99,7 +100,7 @@ public class Server extends Thread {
                             String receiver = m.getReceiver();
                             if (this.idip.containsKey(receiver)) {
                                 // receiver exists
-                                ArrayList<Message> msgs = this.msgToSend.get(receiver);
+                                ArrayList<Message> msgs = this.msgToSend.get(receiver);                                
                                 msgs.add(m);
 
                                 this.msgToSend.put(receiver, msgs);
@@ -107,8 +108,10 @@ public class Server extends Thread {
                             
                         }                                            
                     }
-                    // send old messages to p.getSender()
-                    ArrayList<Message> oldMessages = this.msgToSend.get(p.getSender());
+                    // send old messages to p.getSender() removing it and adding a new, empty ArrayList
+                    ArrayList<Message> oldMessages = this.msgToSend.remove(p.getSender());
+                    
+                    this.msgToSend.put(p.getSender(), new ArrayList<Message>());
                     
                     TreeSet<String> onlinePeople = new TreeSet<>();
                     

@@ -41,9 +41,9 @@ public class ClientManager extends Thread {
                 // if there is at least one packet to send
                 if (forServer.size() != 0) {
                     // first optimization
-                    this.forServer = Worker.packetOptimizer(forServer, client.getClientName());
+                    //this.forServer = Worker.packetOptimizer(forServer, client.getClientName());
 
-                    toSend = this.forServer.get();
+                    toSend = this.forServer.remove();
                     
                     // every 10 normal packet, 1 is for online people
                     if (counter%10 == 0) {
@@ -56,13 +56,13 @@ public class ClientManager extends Thread {
                     }
                 }
                 else {
-                    // no packet for server, so client will ask for online people
+                    // no packet for server, client will ask for online people
                     toSend = new Packet(client.getClientName(), "SERVER", null, null, 7);
                 }
                 
                 // client send packet to server and store response from server
-                Packet response = this.client.sendReceive(toSend);
-
+                Packet response = this.client.sendReceive(toSend);                
+                
                 if (response != null) {
                     this.forClient.add(response);
                     
@@ -122,7 +122,7 @@ public class ClientManager extends Thread {
     
     private void packetManager () {        
         // second optimization
-        this.forClient = Worker.packetOptimizer(forClient, client.getClientName());
+        //this.forClient = Worker.packetOptimizer(forClient, client.getClientName());        
         
         // send packet to GraphicInterfaceClient        
         GIC.updateWindow(forClient);        

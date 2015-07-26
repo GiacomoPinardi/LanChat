@@ -25,19 +25,17 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     private String clientName;
     
     boolean canUpdateOnlinePeopleList;
-    // store active chats names
-    ArrayList<String> activeChats;
     
     public GraphicInterfaceClient(String clientName) {
         initComponents();
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         
         this.conversations = new HashMap<>();        
-            
+        /*  
         JTextArea jta = new JTextArea();
         jta.setEditable(false);
         jTabbedPane1.addTab("All", jta);
-        
+        */
         this.forServer = new PacketQueue();
         
         this.online = true;
@@ -45,8 +43,6 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         this.clientName = clientName;
         
         this.canUpdateOnlinePeopleList = true;
-        
-        this.activeChats = new ArrayList<>();
     }
 
     /**
@@ -176,7 +172,9 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             // toggle button released
             if (jList1.getSelectedIndex() != -1) {
                 if (jList1.getMaxSelectionIndex() - jList1.getMinSelectionIndex() == 0) {
-                    System.out.println("gosh");
+                    
+                this.openNewChat(true, jList1.getSelectedValue().toString(), clientName);
+                    
                 }
                 else {
                     // two or more selected
@@ -213,9 +211,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton2ActionPerformed
      
-    public void updateWindow (PacketQueue pq) {
-        this.updateTabbedPane();
-        
+    public void updateWindow (PacketQueue pq) {       
         // contains all online people from packets
         TreeSet<String> onlinePeople = new TreeSet<>();
         
@@ -233,23 +229,18 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                     String sender = m.getSender();
                     Conversation c;
 
-                    int indexConversation = this.tabbedPaneContains(sender);
-                    JTextArea jta;
+                    int indexConversation = this.tabbedPaneContains(sender);                    
                     
                     if (indexConversation != -1) {
                         // conversation with sender is visible in the tabbedPane
-                        jta = (JTextArea) jTabbedPane1.getComponentAt(indexConversation);
+                        JTextArea jta = (JTextArea) jTabbedPane1.getComponentAt(indexConversation);
                         jta.append(sender + ": " + m.getInformation() + "\n");
                         jTabbedPane1.insertTab(sender, null, jta, null, indexConversation);
                     }
                     else {
                         // conversation is not visible
-                        jta = new JTextArea();
                         
-                        jta.setEditable(false);
-                        
-                        jta.append(sender + ": " + m.getInformation() + "\n");
-                        jTabbedPane1.add(sender, jta);
+                        this.openNewChat(false, sender, m.getInformation());                        
                     }
                     
                     if (conversations.containsKey(sender)) {
@@ -270,27 +261,44 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         this.updateOnlinePeopleList(onlinePeople);
     }
     
-    private void updateTabbedPane () {
-        // all title of the current shown conversation are stored in 'activeChats'
-        this.activeChats.clear();
-        
-        for (int i = 0; i < jTabbedPane1.getTabCount(); i++) {
-            this.activeChats.add(jTabbedPane1.getTitleAt(i));
+    // noMessage: true --> no new message to show
+    private void openNewChat (boolean noMessage, String sender, String message) {
+        JTextArea jta = new JTextArea();
+                        
+        jta.setEditable(false);
+
+        if (!noMessage) {
+            jta.append(sender + ": " + message + "\n");
         }
+        
+        if (this.conversations.containsKey(sender)) {
+            Conversation c = this.conversations.get(sender);
+            for (int i = 0; i < c.size(); i++) {
+                Message m = c.getMsg(i);
+                jta.append(m.getSender() + ": " + m.getInformation() + "\n");
+            }
+        }
+        
+        jTabbedPane1.add(sender, jta);
     }
     
     private int tabbedPaneContains (String chatName) {
         // return index of chat if contains it, else return -1
-        for (int i = 0; i < activeChats.size(); i++) {
-            if (chatName.equals(activeChats.get(i))) {
+        for (int i = 0; i < jTabbedPane1.getTabCount(); i++) {
+            if (chatName.equals(jTabbedPane1.getTitleAt(i))) {
                 return i;
             }
-        }
+        }        
         return -1;
     }
     
     public PacketQueue getPacketForServer () {
-        return this.forServer;
+        PacketQueue tmp = new PacketQueue();
+        tmp.addAll(forServer);
+        
+        forServer.clear();
+        
+        return tmp;
     }
     
     private void updateOnlinePeopleList (TreeSet<String> onlinePeople) {

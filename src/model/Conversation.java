@@ -10,6 +10,7 @@ public class Conversation {
 
     public Conversation(String id) {
         this.id = id;
+        this.messages = new ArrayList<>();
     }
     
     public void addMsgs (ArrayList<Message> ms) {
@@ -30,6 +31,10 @@ public class Conversation {
         
     public String getId () {
         return this.id;
+    }
+    
+    public int size () {
+        return messages.size();
     }
     
 }

@@ -25,6 +25,10 @@ public class PacketQueue {
         return al.get(0);
     }
     
+    public Packet remove () {
+        return al.remove(0);
+    }
+    
     public ArrayList<Packet> getAll () {
         return al;
     }
