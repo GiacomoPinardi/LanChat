@@ -110,7 +110,7 @@ public class Server extends Thread {
                     // send old messages to p.getSender()
                     ArrayList<Message> oldMessages = this.msgToSend.get(p.getSender());
                     
-                    TreeSet<String> onlinePeople = null;
+                    TreeSet<String> onlinePeople = new TreeSet<>();
                     
                     // client ask for online people
                     if (p.getAction() == 7) {

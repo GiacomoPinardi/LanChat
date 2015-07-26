@@ -17,45 +17,67 @@ public class ClientManager extends Thread {
     
     public ClientManager(Client client) {
         this.client = client;
-        this.GIC = new GraphicInterfaceClient();
+        this.GIC = new GraphicInterfaceClient(this.client.getClientName());
         this.forServer = new PacketQueue();
         this.forClient = new PacketQueue();        
     }
     
     @Override
     public void run () {
+        int delay = 500;
+        int counter = 0;
+        
         while (GIC.isOnline()) {        
             // here client will ask server for packet and with 'updateWindow' the new packet will be sent
-            
-            // if there is at least one packet to send
-            if (forServer.size() != 0) {
+                            
+            // client connect to server
+            // REMINDER: if no packets aren't send client MUST disconnect: "client.disconnect();"
+            if (this.client.connect()) {
+                GIC.setConsoleText(true, "Client connected");                        
                 
-                // client connect to server
-                // REMINDER: if no packets aren't send client MUST disconnect: "client.disconnect();"
-                if (this.client.connect()) {
-                    GIC.setConsoleText(true, "Client connected");                        
-
+                // packet for server
+                Packet toSend;
+                
+                // if there is at least one packet to send
+                if (forServer.size() != 0) {
                     // first optimization
                     this.forServer = Worker.packetOptimizer(forServer, client.getClientName());
 
-                    // client send packet to server and store response from server
-                    Packet response = this.client.sendReceive(this.forServer.get());
-
-                    if (response != null) {
-                        this.forClient.add(response);
-
-                        // client manage packet to/from server
-                        this.packetManager();
+                    toSend = this.forServer.get();
+                    
+                    // every 10 normal packet, 1 is for online people
+                    if (counter%10 == 0) {
+                        if (toSend.getAction() == 0) {
+                            toSend.setAction(7);
+                        }
+                        else {
+                            counter --;
+                        }
                     }
                 }
                 else {
-                    GIC.setConsoleText(false, "Connection error!");
+                    // no packet for server, so client will ask for online people
+                    toSend = new Packet(client.getClientName(), "SERVER", null, null, 7);
                 }
+                
+                // client send packet to server and store response from server
+                Packet response = this.client.sendReceive(toSend);
+
+                if (response != null) {
+                    this.forClient.add(response);
+                    
+                    // client manage packet to/from server
+                    this.packetManager();
+                }
+                
+                counter ++;
+            }
+            else {
+                GIC.setConsoleText(false, "Connection error!");
             }
             
-            
             try {
-                Thread.sleep(500);
+                Thread.sleep(delay);
             }
             catch (InterruptedException IE) {
                 
@@ -70,7 +92,7 @@ public class ClientManager extends Thread {
             if (!this.client.leave()) {            
                 JOptionPane.showMessageDialog(GIC, "Cannot leave server!\nPlease retry.", "ERROR", JOptionPane.ERROR_MESSAGE);
             }
-        }        
+        }
     }
     
     public boolean showClientInterface () {
@@ -104,6 +126,8 @@ public class ClientManager extends Thread {
         
         // send packet to GraphicInterfaceClient        
         GIC.updateWindow(forClient);        
+        
+        forClient.clear();
         
         // get packet from GraphicInterfaceClient
         forServer.addAll(GIC.getPacketForServer());

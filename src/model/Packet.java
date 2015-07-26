@@ -50,6 +50,10 @@ public class Packet implements Serializable {
         return action;
     }
     
+    public void setAction (int action) {
+        this.action = action;
+    }
+    
     public TreeSet<String> getOnlinePeople () {
         return onlinePeople;
     }

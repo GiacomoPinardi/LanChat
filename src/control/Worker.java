@@ -84,10 +84,12 @@ public class Worker {
         PacketQueue result = new PacketQueue();
         
         for (Packet p : pq.getAll()) {
-            onlinePeople.addAll(p.getOnlinePeople());
+            if (p.getOnlinePeople() != null) {
+                onlinePeople.addAll(p.getOnlinePeople());
+            }            
             
             // if the packet is normal
-            if (p.getAction() == 0) {
+            if (p.getAction() == 0 && p.getData() != null) {
                 for (Message m : p.getData()) {
                     ArrayList<Message> tmp;
                     
