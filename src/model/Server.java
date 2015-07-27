@@ -4,10 +4,15 @@ package model;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.TreeSet;
 
@@ -147,16 +152,41 @@ public class Server extends Thread {
     }
     
     public String getInfo () {
-        String s;
+        // store the local IPv4 (work also without internet)
+        String ip = "x.x.x.x";
+        
         try {
-            Socket a = new Socket("192.168.1.1", 80);
-            s = a.getLocalAddress().getHostAddress();
-            a.close();
+            // get all interface from pc network
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()){
+                // current element is the next interface
+                NetworkInterface currentInterface = interfaces.nextElement();
+                if (!currentInterface.isUp() || currentInterface.isLoopback() || currentInterface.isVirtual()) {
+                    // skip if the interface isn't 'good'
+                    continue;
+                }
+                // get all addresses from the current interface
+                Enumeration<InetAddress> addresses = currentInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress currentAddress = addresses.nextElement();
+                    if (currentAddress.isLoopbackAddress()) {
+                        // skip
+                        continue;
+                    }
+                    if (currentAddress instanceof Inet6Address) {
+                        // skip IPv6
+                        continue;
+                    }
+                    if (currentAddress instanceof Inet4Address)
+                        // IPv4 is stored
+                        ip = currentAddress.getHostAddress();
+                }
+            }
         }
-        catch (IOException Ex) {
-            s = "x.x.x.x";
+        catch (IOException IOE) {
+            //
         }
-        return s + ":" + serverSocket.getLocalPort();
+        return ip + ":" + this.serverSocket.getLocalPort();
     }
     
     public void setOffline () {
