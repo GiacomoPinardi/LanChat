@@ -57,7 +57,7 @@ public class Worker {
         
         String name = "";
         
-        int lenght = r.nextInt(4) + 4;
+        int lenght = r.nextInt(11) + 4;
         
         for (int i = 0; i < lenght; i++) {
             name += (char) (r.nextInt(26) + 'a');

@@ -3,10 +3,12 @@ package view;
 
 import control.Worker;
 import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import model.Conversation;
 import model.Message;
@@ -119,14 +121,16 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.LEADING))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 12, 12)
+                        .addGap(34, 34, 34)
                         .addComponent(jLabel2))
-                    .addComponent(jToggleButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jToggleButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -139,9 +143,9 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(15, 15, 15)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -166,15 +170,21 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         if (jToggleButton1.isSelected()) {
             // toggle button pressed
+            
+            this.setEnabledComponent(false);
             this.canUpdateOnlinePeopleList = false;
         }
         else {
             // toggle button released
             if (jList1.getSelectedIndex() != -1) {
-                if (jList1.getMaxSelectionIndex() - jList1.getMinSelectionIndex() == 0) {
-                    
-                this.openNewChat(true, jList1.getSelectedValue().toString(), clientName);
-                    
+                if (jList1.getMaxSelectionIndex() - jList1.getMinSelectionIndex() == 0) {                
+                    if (this.tabbedPaneContains(jList1.getSelectedValue().toString()) == -1) {
+                        this.openNewChat(true, jList1.getSelectedValue().toString(), clientName);
+                    }
+                    else {
+                        // chat is already shown
+                        JOptionPane.showMessageDialog(rootPane, "Chat you have selected is already shown!", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    }                    
                 }
                 else {
                     // two or more selected
@@ -186,12 +196,13 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(rootPane, "Please select one person from the list!", "ERROR", JOptionPane.ERROR_MESSAGE);
             }
             
+            this.setEnabledComponent(true);
             this.canUpdateOnlinePeopleList = true;            
         }
     }//GEN-LAST:event_jToggleButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        if (jTextField1.getText() != null) {
+        if (!jTextField1.getText().equals("") && jTabbedPane1.getSelectedIndex() != -1) {
             // new packet is created
             int indexPane = jTabbedPane1.getSelectedIndex();
             String sender = this.clientName;
@@ -202,12 +213,15 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             
             Packet p = new Packet(sender, receiver, al, null, 0);
             
-            this.forServer.add(p);
+            this.forServer.add(p);            
             
             // jTabbedPane is updated with new message
             JTextArea jta = (JTextArea) jTabbedPane1.getSelectedComponent();
             jta.append(sender + ": " + jTextField1.getText() + "\n");
-            jTabbedPane1.insertTab(receiver, null, jta, null, indexPane);         
+            
+            jTabbedPane1.insertTab(receiver, null, jta, null, indexPane); 
+            
+            jTextField1.setText("");
         }
     }//GEN-LAST:event_jButton2ActionPerformed
      
@@ -231,15 +245,14 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
 
                     int indexConversation = this.tabbedPaneContains(sender);                    
                     
-                    if (indexConversation != -1) {
-                        // conversation with sender is visible in the tabbedPane
+                    if (indexConversation != -1) {                        
+                        // conversation with sender is visible in the tabbedPane                        
                         JTextArea jta = (JTextArea) jTabbedPane1.getComponentAt(indexConversation);
-                        jta.append(sender + ": " + m.getInformation() + "\n");
+                        jta.append(sender + ": " + m.getInformation() + "\n");                        
                         jTabbedPane1.insertTab(sender, null, jta, null, indexConversation);
                     }
                     else {
-                        // conversation is not visible
-                        
+                        // conversation is not visible                        
                         this.openNewChat(false, sender, m.getInformation());                        
                     }
                     
@@ -258,7 +271,10 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             }
         }
         
-        this.updateOnlinePeopleList(onlinePeople);
+        //if (!onlinePeople.isEmpty()) {
+            this.updateOnlinePeopleList(onlinePeople);
+        //}
+        
     }
     
     // noMessage: true --> no new message to show
@@ -266,6 +282,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         JTextArea jta = new JTextArea();
                         
         jta.setEditable(false);
+        jta.setLineWrap(true);
 
         if (!noMessage) {
             jta.append(sender + ": " + message + "\n");
@@ -277,9 +294,21 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                 Message m = c.getMsg(i);
                 jta.append(m.getSender() + ": " + m.getInformation() + "\n");
             }
-        }
+        } 
         
         jTabbedPane1.add(sender, jta);
+    }
+    
+    // TEST - TO DO (usare una copia dell'app!)
+    private JTextArea getTextArea (JScrollPane jsp) {
+        for (Component c : jsp.getComponents()) {
+            if (c.getName() != null) {
+                if (c.getName().equals("textArea")) {
+                    return (JTextArea) c;
+                }
+            }
+        }
+        return null;
     }
     
     private int tabbedPaneContains (String chatName) {
@@ -290,6 +319,12 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             }
         }        
         return -1;
+    }
+    
+    private void setEnabledComponent (boolean b) {
+        jButton2.setEnabled(b);
+        jMenu1.setEnabled(b);
+        jMenuItem1.setEnabled(b);
     }
     
     public PacketQueue getPacketForServer () {

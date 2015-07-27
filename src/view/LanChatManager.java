@@ -215,18 +215,28 @@ public class LanChatManager extends javax.swing.JFrame {
         if (Worker.ipChecker(jTextField2.getText())) {
             int port = Worker.checkPortNumber(jTextField3.getText());
             if (port != -1) {
-                if (jTextField1.getText().equals("")) {
-                    jTextField1.setText(Worker.randomName());
+                if (!jTextField1.getText().contains(" ")) {
+                    if (jTextField1.getText().length() <= 14) {
+                        if (jTextField1.getText().equals("")) {
+                            jTextField1.setText(Worker.randomName());
+                        }
+                        // all fields are correct, new client is created
+                        Client c = new Client(jTextField1.getText(), jTextField2.getText(), port);
+
+                        // ClientManager manage client and send/ask server new messages
+                        ClientManager CM = new ClientManager(c);
+
+                        // CM try to start client, if client work correctly CM run a thread that periodically check server
+                        if (CM.showClientInterface()) {
+                            CM.start();
+                        }                    
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(rootPane, "Name too long!\nMaximium 14 letters.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
-                // all fields are correct, new client is created
-                Client c = new Client(jTextField1.getText(), jTextField2.getText(), port);
-                
-                // ClientManager manage client and send/ask server new messages
-                ClientManager CM = new ClientManager(c);
-                
-                // CM try to start client, if client work correctly CM run a thread that periodically check server
-                if (CM.showClientInterface()) {
-                    CM.start();
+                else {
+                    JOptionPane.showMessageDialog(rootPane, "Name cannot contain spaces!", "ERROR", JOptionPane.ERROR_MESSAGE);
                 }
             }
             else {

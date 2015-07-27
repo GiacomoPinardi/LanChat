@@ -2,7 +2,8 @@
 package control;
 
 import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import model.Server;
 import view.GraphicInterfaceServer;
 
@@ -22,26 +23,34 @@ public class ServerManager extends Thread {
             // update the GIS with new stats and info from server
                  
             if (GIS.canUpdate()) {
-                // server manager can update the window
-                TreeMap<String, String[]> tm = new TreeMap<>();
+                // server manager can update the window                
+                // contains all name sorted
+                SortedSet<String> sorted = new TreeSet<>();
+                
+                HashMap<String, String> hmIp = server.getIdip();
+                HashMap<String, Integer> hmMsg = server.getMsgToSend();
 
-                HashMap<String, String> hm1 = server.getIdip();
-                HashMap<String, Integer> hm2 = server.getMsgToSend();
-
-                for (String name : hm1.keySet()) {
-                    String[] data = new String[2];
-                    data[0] = hm1.get(name);
-                    data[1] = String.valueOf(hm2.get(name));
-
-                    tm.put(name, data);
+                for (String name : hmIp.keySet()) {
+                    sorted.add(name);
                 }
-
-                GIS.updateWindow(tm);
+                
+                // [x][0]: name ; [x][1]: ip ; [x][2]: msg to send
+                String[][] data = new String[sorted.size()][3];
+                
+                int i = 0;
+                for (String name : sorted) {
+                    data[i][0] = name;
+                    data[i][1] = hmIp.get(name);
+                    data[i][2] = String.valueOf(hmMsg.get(name));
+                    i++;
+                }
+                
+                GIS.updateWindow(data);
             }
             
             // wait an amount of time
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             }
             catch (InterruptedException IE) {
                 System.err.println("Interrupted Exception : " + IE.getLocalizedMessage());

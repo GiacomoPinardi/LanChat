@@ -43,7 +43,7 @@ public class Server extends Thread {
                 // Packet from sender
                 Packet data = (Packet) in.readObject();
                 
-                Packet r = this.packetManager(data, socket.getInetAddress().toString());
+                Packet r = this.packetManager(data, socket.getInetAddress().getHostAddress());
                 
                 // Packet to sender
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
@@ -147,7 +147,16 @@ public class Server extends Thread {
     }
     
     public String getInfo () {
-        return serverSocket.getInetAddress().toString() + ":" + serverSocket.getLocalPort();
+        String s;
+        try {
+            Socket a = new Socket("192.168.1.1", 80);
+            s = a.getLocalAddress().getHostAddress();
+            a.close();
+        }
+        catch (IOException Ex) {
+            s = "x.x.x.x";
+        }
+        return s + ":" + serverSocket.getLocalPort();
     }
     
     public void setOffline () {

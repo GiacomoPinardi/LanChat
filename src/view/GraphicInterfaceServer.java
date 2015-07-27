@@ -1,7 +1,9 @@
 
 package view;
 
-import java.util.TreeMap;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 
@@ -13,12 +15,18 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
     // true if ServerManager can update window, false otherwise
     private boolean canUpdate;
     
+    // manage clipboard
+    Clipboard clipboard;
+    StringSelection selection;
+    
     public GraphicInterfaceServer() {
         initComponents();        
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         
         this.online = true;
         this.canUpdate = true;
+        
+        clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     }
 
     /**
@@ -32,11 +40,11 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jToggleButton1 = new javax.swing.JToggleButton();
+        jToggleButton2 = new javax.swing.JToggleButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -45,20 +53,8 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        jList1.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         jScrollPane1.setViewportView(jList1);
-
-        jButton1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        jButton1.setText("Copy name");
-        jButton1.setFocusPainted(false);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
-        jButton2.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        jButton2.setText("Copy ip");
-        jButton2.setFocusPainted(false);
 
         jLabel1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
         jLabel1.setText("Name:");
@@ -68,6 +64,24 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
 
         jLabel3.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
         jLabel3.setText("Messages:");
+
+        jToggleButton1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        jToggleButton1.setText("Copy Name");
+        jToggleButton1.setFocusable(false);
+        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButton1ActionPerformed(evt);
+            }
+        });
+
+        jToggleButton2.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        jToggleButton2.setText("Copy Ip");
+        jToggleButton2.setFocusable(false);
+        jToggleButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButton2ActionPerformed(evt);
+            }
+        });
 
         jMenu1.setText("Action");
 
@@ -83,7 +97,7 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
 
         jMenu2.setText("View");
 
-        jMenuItem2.setText("Stop update");
+        jMenuItem2.setText("Stop refresh");
         jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem2ActionPerformed(evt);
@@ -102,27 +116,22 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(43, 43, 43)
-                                .addComponent(jLabel1))
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jButton1)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(40, 40, 40)
-                                .addComponent(jButton2)
-                                .addGap(0, 110, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(70, 70, 70)
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel3)
-                                .addGap(13, 13, 13))))
+                        .addGap(43, 43, 43)
+                        .addComponent(jLabel1)
+                        .addGap(102, 102, 102)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 64, Short.MAX_VALUE)
+                        .addComponent(jLabel3)
+                        .addGap(13, 13, 13))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jScrollPane1)))
+                        .addComponent(jScrollPane1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jToggleButton1)
+                        .addGap(37, 37, 37)
+                        .addComponent(jToggleButton2)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -130,8 +139,8 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(jToggleButton1)
+                    .addComponent(jToggleButton2))
                 .addGap(7, 7, 7)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -161,31 +170,101 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        JOptionPane.showMessageDialog(rootPane, "TO DO!", "TO DO!", JOptionPane.ERROR_MESSAGE);
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        if (jMenuItem2.getText().equalsIgnoreCase("Stop updating")) {
+        if (jMenuItem2.getText().equalsIgnoreCase("Stop refresh")) {
             this.canUpdate = false;
-            jMenuItem2.setText("Start updating");
+            jMenuItem2.setText("Start refresh");
         }
         else {
             this.canUpdate = true;
-            jMenuItem2.setText("Stop updating");
+            jMenuItem2.setText("Stop refresh");
         }
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
-    public void updateWindow (TreeMap<String, String[]> tm) {
-        // Key: name ; value: {ip, number of messages}
-        
+    private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
+        if (jToggleButton1.isSelected()) {
+            // toggle button pressed
+            
+            jToggleButton2.setEnabled(false);
+            this.setEnabledComponent(false);
+            this.canUpdate = false;
+        }
+        else {
+            // toggle button released
+            if (jList1.getSelectedIndex() != -1) {
+                if (jList1.getMaxSelectionIndex() - jList1.getMinSelectionIndex() == 0) {                
+                    String s = (String) jList1.getSelectedValue();
+                    String data[] = s.replace(" ", "").split(String.valueOf((char) 007));
+                    
+                    selection = new StringSelection(data[0]);
+                    clipboard.setContents(selection, null);
+                }
+                else {
+                    // two or more selected
+                    JOptionPane.showMessageDialog(rootPane, "Please select ONE item!", "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            else {
+                // no one selected
+                JOptionPane.showMessageDialog(rootPane, "Please select one item from the list!", "ERROR", JOptionPane.ERROR_MESSAGE);
+            }
+            
+            jToggleButton2.setEnabled(true);
+            this.setEnabledComponent(true);
+            this.canUpdate = true;
+        }
+    }//GEN-LAST:event_jToggleButton1ActionPerformed
+
+    private void jToggleButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton2ActionPerformed
+        if (jToggleButton2.isSelected()) {
+            // toggle button pressed
+            
+            jToggleButton1.setEnabled(false);
+            this.setEnabledComponent(false);
+            this.canUpdate = false;
+        }
+        else {
+            // toggle button released
+            if (jList1.getSelectedIndex() != -1) {
+                if (jList1.getMaxSelectionIndex() - jList1.getMinSelectionIndex() == 0) {                
+                    String s = (String) jList1.getSelectedValue();
+                    String data[] = s.replace(" ", "").split(String.valueOf((char) 007));
+                    
+                    selection = new StringSelection(data[1]);
+                    clipboard.setContents(selection, null);
+                }
+                else {
+                    // two or more selected
+                    JOptionPane.showMessageDialog(rootPane, "Please select ONE item!", "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            else {
+                // no one selected
+                JOptionPane.showMessageDialog(rootPane, "Please select one item from the list!", "ERROR", JOptionPane.ERROR_MESSAGE);
+            }
+            
+            jToggleButton1.setEnabled(true);
+            this.setEnabledComponent(true);
+            this.canUpdate = true;
+        }
+    }//GEN-LAST:event_jToggleButton2ActionPerformed
+    
+    private void setEnabledComponent (boolean b) {
+        jMenu1.setEnabled(b);
+        jMenu2.setEnabled(b);
+        jMenuItem1.setEnabled(b);
+        jMenuItem2.setEnabled(b);
+    }
+    
+    public void updateWindow (String[][] data) {
+        // [x][0]: name ; [x][1]: ip ; [x][2]: msg to send
         // update jList with the new stats and info 
         
         Vector<String> v = new Vector<>();
         
-        for (String n : tm.keySet()) {
-            String[] tmp = tm.get(n);
-            v.add(n + "  -  " + tmp[0] + "   -  " + tmp[1]);
+        for (int i = 0; i < data.length; i++) {
+            String s1 = String.format("%-18s%s", data[i][0], ((char) 007) + data[i][1]);
+            v.add(String.format("%-40s%s", s1, ((char) 007) + data[i][2]));
         }
         
         jList1.setListData(v);
@@ -200,8 +279,6 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -212,5 +289,7 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JToggleButton jToggleButton1;
+    private javax.swing.JToggleButton jToggleButton2;
     // End of variables declaration//GEN-END:variables
 }
