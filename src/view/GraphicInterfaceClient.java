@@ -3,7 +3,6 @@ package view;
 
 import control.Worker;
 import java.awt.Color;
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -179,7 +178,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             if (jList1.getSelectedIndex() != -1) {
                 if (jList1.getMaxSelectionIndex() - jList1.getMinSelectionIndex() == 0) {                
                     if (this.tabbedPaneContains(jList1.getSelectedValue().toString()) == -1) {
-                        this.openNewChat(true, jList1.getSelectedValue().toString(), clientName);
+                        this.openNewChat(jList1.getSelectedValue().toString());
                     }
                     else {
                         // chat is already shown
@@ -215,11 +214,10 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             
             this.forServer.add(p);            
             
-            // jTabbedPane is updated with new message
-            JTextArea jta = (JTextArea) jTabbedPane1.getSelectedComponent();
-            jta.append(sender + ": " + jTextField1.getText() + "\n");
-            
-            jTabbedPane1.insertTab(receiver, null, jta, null, indexPane); 
+            // conversation is updated with the new message
+            Conversation c = conversations.get(receiver);            
+            c.addMsg(msg);
+            conversations.put(receiver, c);
             
             jTextField1.setText("");
         }
@@ -242,29 +240,24 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
 
                     String sender = m.getSender();
                     Conversation c;
-
-                    int indexConversation = this.tabbedPaneContains(sender);                    
                     
-                    if (indexConversation != -1) {                        
-                        // conversation with sender is visible in the tabbedPane                        
-                        JTextArea jta = (JTextArea) jTabbedPane1.getComponentAt(indexConversation);
-                        jta.append(sender + ": " + m.getInformation() + "\n");                        
-                        jTabbedPane1.insertTab(sender, null, jta, null, indexConversation);
-                    }
-                    else {
-                        // conversation is not visible                        
-                        this.openNewChat(false, sender, m.getInformation());                        
-                    }
+                    int indexConversation = this.tabbedPaneContains(sender);                    
                     
                     if (conversations.containsKey(sender)) {
                         // exists conversation
                         c = conversations.get(sender);
+                        
+                        if (indexConversation == -1) {
+                            // conversation isn't shown
+                            jTabbedPane1.addTab(sender, new JScrollPane(c.getTextArea()));
+                        }
                     }
                     else {
                         // new conversation
                         c = new Conversation(sender);
+                        jTabbedPane1.addTab(sender, new JScrollPane(c.getTextArea()));
                     }
-
+                    // message is added                     
                     c.addMsg(m);
                     conversations.put(sender, c);
                 }
@@ -277,38 +270,21 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         
     }
     
-    // noMessage: true --> no new message to show
-    private void openNewChat (boolean noMessage, String sender, String message) {
-        JTextArea jta = new JTextArea();
-                        
-        jta.setEditable(false);
-        jta.setLineWrap(true);
-
-        if (!noMessage) {
-            jta.append(sender + ": " + message + "\n");
+    private void openNewChat (String chatName) {        
+        Conversation c;
+        
+        if (conversations.containsKey(chatName)) {
+            // exists conversation
+            c = conversations.get(chatName);
+        }
+        else {
+            // new conversation is created
+            c = new Conversation(chatName);
         }
         
-        if (this.conversations.containsKey(sender)) {
-            Conversation c = this.conversations.get(sender);
-            for (int i = 0; i < c.size(); i++) {
-                Message m = c.getMsg(i);
-                jta.append(m.getSender() + ": " + m.getInformation() + "\n");
-            }
-        } 
+        conversations.put(chatName, c);
         
-        jTabbedPane1.add(sender, jta);
-    }
-    
-    // TEST - TO DO (usare una copia dell'app!)
-    private JTextArea getTextArea (JScrollPane jsp) {
-        for (Component c : jsp.getComponents()) {
-            if (c.getName() != null) {
-                if (c.getName().equals("textArea")) {
-                    return (JTextArea) c;
-                }
-            }
-        }
-        return null;
+        jTabbedPane1.add(chatName, new JScrollPane(c.getTextArea()));
     }
     
     private int tabbedPaneContains (String chatName) {
