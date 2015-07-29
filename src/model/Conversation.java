@@ -1,10 +1,11 @@
 
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.JTextArea;
 
-public class Conversation {
+public class Conversation implements Serializable {
     
     private ArrayList<Message> messages;
     private String id;
@@ -16,6 +17,8 @@ public class Conversation {
         this.textArea = new JTextArea();
         textArea.setEditable(false);
         textArea.setLineWrap(true);
+        textArea.setRows(22);
+        textArea.invalidate();
     }
     
     public void addMsgs (ArrayList<Message> ms) {
@@ -30,8 +33,22 @@ public class Conversation {
         this.messages.add(m);
     }
     
+    public void addMsgsOnTop (ArrayList<Message> ms) {        
+        String total = "";
+        for (Message m : ms) {
+            total = total.concat(m.getSender() + ": " + m.getInformation() + "\n");
+        }
+        
+        textArea.setText(total + textArea.getText());
+        this.messages.addAll(0, ms);
+    }
+    
     public Message getMsg (int index) {
         return this.messages.get(index);
+    }
+    
+    public ArrayList<Message> getAllMsgs () {
+        return this.messages;
     }
     
     public void clearAllMsgs () {

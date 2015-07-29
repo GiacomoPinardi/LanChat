@@ -100,7 +100,7 @@ public class ClientManager extends Thread {
             int r = this.client.join();
             if (r == 0) {
                 // start client view
-                GIC.setTitle("LanChat: " + this.client.getClientName() + " - " + this.client.getServerName() + " [" + this.client.getPort() + "]");
+                GIC.setTitle("LanChat: " + this.client.getClientName() + " - " + this.client.getServerName() + ":" + this.client.getPort());
                 GIC.setVisible(true);
                 return true;
             }

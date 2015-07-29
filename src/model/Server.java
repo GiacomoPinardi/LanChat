@@ -109,8 +109,7 @@ public class Server extends Thread {
                                 msgs.add(m);
 
                                 this.msgToSend.put(receiver, msgs);
-                            }                                
-                            
+                            }                            
                         }                                            
                     }
                     // send old messages to p.getSender() removing it and adding a new, empty ArrayList

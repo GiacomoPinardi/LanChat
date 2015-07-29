@@ -1,14 +1,20 @@
 
 package control;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.regex.PatternSyntaxException;
+import model.Conversation;
 import model.Message;
 import model.Packet;
 import model.PacketQueue;
@@ -72,6 +78,37 @@ public class Worker {
             v.add(s);
         }
         return v;
+    }
+    
+    public static boolean serializeConversations (ArrayList<Conversation> al, File f) {
+        try {
+            FileOutputStream fOut = new FileOutputStream(f);
+            ObjectOutputStream oos = new ObjectOutputStream(fOut);
+            oos.writeObject(al);
+            oos.close();
+            fOut.close();            
+            return true;
+        }
+        catch(IOException IOE) {
+            return false;
+        }
+    }
+    
+    public static ArrayList<Conversation> deserializeConversations (File f) {
+        ArrayList<Conversation> al = null;
+        
+        try {
+            FileInputStream fIn = new FileInputStream(f);
+            ObjectInputStream in = new ObjectInputStream(fIn);
+            al = (ArrayList<Conversation>) in.readObject();
+            in.close();
+            fIn.close();
+        }
+        catch(IOException | ClassNotFoundException i) {
+            //
+        }
+
+        return al;
     }
     
     public static PacketQueue packetOptimizer (PacketQueue pq, String clientName) {
