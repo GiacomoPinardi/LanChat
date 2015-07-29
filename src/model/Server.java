@@ -118,10 +118,11 @@ public class Server extends Thread {
                     
                     this.msgToSend.put(p.getSender(), new ArrayList<Message>());
                     
-                    TreeSet<String> onlinePeople = new TreeSet<>();
+                    TreeSet<String> onlinePeople = null;
                     
                     // client ask for online people
                     if (p.getAction() == 7) {
+                        onlinePeople = new TreeSet<>();
                         onlinePeople.addAll(this.idip.keySet());
                     }
                     

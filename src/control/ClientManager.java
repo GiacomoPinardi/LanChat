@@ -24,7 +24,7 @@ public class ClientManager extends Thread {
     
     @Override
     public void run () {
-        int delay = 500;
+        int delay = 200;
         int counter = 0;
         
         while (GIC.isOnline()) {        
@@ -45,8 +45,8 @@ public class ClientManager extends Thread {
 
                     toSend = this.forServer.remove();
                     
-                    // every 10 normal packet, 1 is for online people
-                    if (counter%10 == 0) {
+                    // every 5 normal packet, 1 is for online people
+                    if (counter%5 == 0) {
                         if (toSend.getAction() == 0) {
                             toSend.setAction(7);
                         }

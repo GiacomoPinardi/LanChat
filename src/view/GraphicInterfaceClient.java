@@ -65,6 +65,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         jToggleButton1 = new javax.swing.JToggleButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -97,6 +98,14 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         });
 
         jMenu1.setText("Action");
+
+        jMenuItem2.setText("Close conversation");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem2);
 
         jMenuItem1.setText("Quit");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
@@ -136,13 +145,13 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jToggleButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(15, 15, 15)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE))
+                    .addComponent(jTabbedPane1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2))
@@ -222,22 +231,27 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             jTextField1.setText("");
         }
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        jTabbedPane1.remove(jTabbedPane1.getSelectedIndex());
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
      
     public void updateWindow (PacketQueue pq) {       
         // contains all online people from packets
         TreeSet<String> onlinePeople = new TreeSet<>();
         
+        boolean onlineUpdater = false;
+        
         for (Packet p : pq.getAll()) {
             // get list of online people at the moment
             if (p.getOnlinePeople() != null) {
                 onlinePeople.addAll(p.getOnlinePeople());
-                onlinePeople.remove(this.clientName);
+                onlineUpdater = true;
             }
             
             if (p.getData() != null) {
                 // new messages saved in conversations
                 for (Message m : p.getData()) {
-
                     String sender = m.getSender();
                     Conversation c;
                     
@@ -264,9 +278,10 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             }
         }
         
-        //if (!onlinePeople.isEmpty()) {
+        if (onlineUpdater) {        
+            onlinePeople.remove(this.clientName);
             this.updateOnlinePeopleList(onlinePeople);
-        //}
+        }
         
     }
     
@@ -344,6 +359,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextField jTextField1;
