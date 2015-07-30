@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class Client {
@@ -19,12 +20,16 @@ public class Client {
     public Client (String clientName, String serverName, int port) {
         this.clientName = clientName;
         this.serverName = serverName;
-        this.port = port;     
+        this.port = port;
     }
     
     public boolean connect () {
         try {
-            this.client = new Socket(this.serverName, this.port);
+            // timeout should be increased for slow connection
+            int timeout = 10000;
+            client = new Socket();            
+            client.connect(new InetSocketAddress(this.serverName, port), timeout);
+            //this.client = new Socket(this.serverName, this.port);
             return true;
         }
         catch (IOException ex) {
@@ -54,7 +59,7 @@ public class Client {
             // to server:
             OutputStream outToServer = client.getOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(outToServer);
-
+            
             out.writeObject(packet);
             
             // from server:
@@ -62,11 +67,10 @@ public class Client {
             ObjectInputStream in = new ObjectInputStream(inFromServer);
             
             Packet p = (Packet) in.readObject();
-                        
+            
             return p;
         }
         catch (IOException | ClassNotFoundException ex) {
-            ex.printStackTrace();
             return null;
         }
     }

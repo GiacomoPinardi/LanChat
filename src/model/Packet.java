@@ -24,6 +24,7 @@ public class Packet implements Serializable {
     // action == 5 --> sender-name doesen't match with ip
     // action == 6 --> sender Client succesfully leaved Server
     // action == 7 --> client ask server onlinePeople
+    // action == 8 --> client have been kicked by server
     private int action;
     
     public Packet (String sender, String receiver, ArrayList<Message> data, TreeSet<String> onlinePeople, int action) {

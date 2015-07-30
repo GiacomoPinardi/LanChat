@@ -8,6 +8,8 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import control.ClientManager;
 import control.ServerManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LanChatManager extends javax.swing.JFrame {
 
@@ -18,6 +20,8 @@ public class LanChatManager extends javax.swing.JFrame {
         this.setTitle("LanChat Manager");
         
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        // enter key will push 'start' button
+        rootPane.setDefaultButton(jButton5);
     }
 
     /**
@@ -206,6 +210,7 @@ public class LanChatManager extends javax.swing.JFrame {
     private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
         jTextField1.setEditable(false);
         jTextField1.setText("");
+        jTextField2.setText("");
         jTextField3.setEditable(true);
         jTextField2.setEditable(false);
         jButton2.setEnabled(false);
@@ -215,21 +220,27 @@ public class LanChatManager extends javax.swing.JFrame {
         if (Worker.ipChecker(jTextField2.getText())) {
             int port = Worker.checkPortNumber(jTextField3.getText());
             if (port != -1) {
-                if (!jTextField1.getText().contains(" ")) {
-                    if (jTextField1.getText().length() <= 14) {
-                        if (jTextField1.getText().equals("")) {
-                            jTextField1.setText(Worker.randomName());
+                String name = jTextField1.getText();
+                if (!name.contains(" ")) {
+                    if (name.length() <= 14) {
+                        if (!name.equals("ALL")) {
+                            if (name.equals("")) {
+                                jTextField1.setText(Worker.randomName());
+                            }
+                            // all fields are correct, new client is created
+                            Client c = new Client(jTextField1.getText(), jTextField2.getText(), port);
+
+                            // ClientManager manage client and send/ask server new messages
+                            ClientManager CM = new ClientManager(c);
+
+                            // CM try to start client, if client work correctly CM run a thread that periodically check server
+                            if (CM.showClientInterface()) {
+                                CM.start();
+                            }
                         }
-                        // all fields are correct, new client is created
-                        Client c = new Client(jTextField1.getText(), jTextField2.getText(), port);
-
-                        // ClientManager manage client and send/ask server new messages
-                        ClientManager CM = new ClientManager(c);
-
-                        // CM try to start client, if client work correctly CM run a thread that periodically check server
-                        if (CM.showClientInterface()) {
-                            CM.start();
-                        }                    
+                        else {
+                            JOptionPane.showMessageDialog(rootPane, "'ALL' is a reserved name!\nTry using 'all'.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
                     else {
                         JOptionPane.showMessageDialog(rootPane, "Name too long!\nMaximium 14 letters.", "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -272,7 +283,7 @@ public class LanChatManager extends javax.swing.JFrame {
             ServerManager SM = new ServerManager(s);
             
             SM.showServerInterface();
-            SM.start();
+            SM.start();            
         }
         catch (IOException IOE) {
             JOptionPane.showMessageDialog(rootPane, "Cannot create new server!\nInput/Output Exception", "ERROR", JOptionPane.ERROR_MESSAGE);

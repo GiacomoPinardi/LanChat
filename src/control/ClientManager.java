@@ -14,35 +14,32 @@ public class ClientManager extends Thread {
     
     private PacketQueue forServer;
     private PacketQueue forClient;
-    
+        
     public ClientManager(Client client) {
         this.client = client;
         this.GIC = new GraphicInterfaceClient(this.client.getClientName());
         this.forServer = new PacketQueue();
-        this.forClient = new PacketQueue();        
+        this.forClient = new PacketQueue();
     }
     
     @Override
     public void run () {
-        int delay = 200;
         int counter = 0;
         
-        while (GIC.isOnline()) {        
+        while (GIC.isOnline() && !GIC.isKicked()) {
             // here client will ask server for packet and with 'updateWindow' the new packet will be sent
                             
             // client connect to server
             // REMINDER: if no packets aren't send client MUST disconnect: "client.disconnect();"
             if (this.client.connect()) {
-                GIC.setConsoleText(true, "Client connected");                        
+                GIC.setConsoleText(true, "Client connected.");
                 
                 // packet for server
                 Packet toSend;
                 
                 // if there is at least one packet to send
                 if (forServer.size() != 0) {
-                    // first optimization
-                    //this.forServer = Worker.packetOptimizer(forServer, client.getClientName());
-
+                    
                     toSend = this.forServer.remove();
                     
                     // every 5 normal packet, 1 is for online people
@@ -61,7 +58,7 @@ public class ClientManager extends Thread {
                 }
                 
                 // client send packet to server and store response from server
-                Packet response = this.client.sendReceive(toSend);                
+                Packet response = this.client.sendReceive(toSend);    
                 
                 if (response != null) {
                     this.forClient.add(response);
@@ -77,22 +74,24 @@ public class ClientManager extends Thread {
             }
             
             try {
-                Thread.sleep(delay);
+                Thread.sleep(200);
             }
             catch (InterruptedException IE) {
-                
+                //
             }
         }
         
-        // client leave server
-        if (!this.client.connect()) {
-            JOptionPane.showMessageDialog(GIC, "Cannot leave server!\nServer connection error.", "ERROR", JOptionPane.ERROR_MESSAGE);
-        }
-        else {
-            if (!this.client.leave()) {            
-                JOptionPane.showMessageDialog(GIC, "Cannot leave server!\nPlease retry.", "ERROR", JOptionPane.ERROR_MESSAGE);
+        if (!GIC.isKicked()) {
+            // client leave server
+            if (!this.client.connect()) {
+                JOptionPane.showMessageDialog(GIC, "Cannot leave server!\nServer connection error.", "ERROR", JOptionPane.ERROR_MESSAGE);
             }
-        }
+            else {
+                if (!this.client.leave()) {            
+                    JOptionPane.showMessageDialog(GIC, "Cannot leave server!\nPlease retry.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }        
     }
     
     public boolean showClientInterface () {
@@ -120,10 +119,7 @@ public class ClientManager extends Thread {
         return false;
     }
     
-    private void packetManager () {        
-        // second optimization
-        //this.forClient = Worker.packetOptimizer(forClient, client.getClientName());        
-        
+    private void packetManager () { 
         // send packet to GraphicInterfaceClient        
         GIC.updateWindow(forClient);        
         

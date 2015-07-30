@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Server extends Thread {
     
@@ -24,17 +25,23 @@ public class Server extends Thread {
     private HashMap<String, String> idip;
     
     // Key: clientName ; value: messages to client
-    private HashMap<String, ArrayList<Message>> msgToSend;
+    private ConcurrentHashMap<String, ArrayList<Message>> msgToSend;
+    
+    // Key: clientName ; value: number of messages sent
+    private HashMap<String, Integer> msgSent;
 
     // server cannot run if it is false
     private boolean online;
     
+    private ArrayList<String> peopleToKick;
+    
     public Server(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
-        
+        this.serverSocket = new ServerSocket(port);
         this.online = true;
         this.idip = new HashMap<>();
-        this.msgToSend = new HashMap<>();
+        this.msgToSend = new ConcurrentHashMap<>();
+        this.msgSent = new HashMap<>();
+        this.peopleToKick = new ArrayList<>();
     }
 
     @Override
@@ -67,11 +74,11 @@ public class Server extends Thread {
             catch (ClassNotFoundException ex) {
                 System.err.println("ERROR: Class Not Found Exception");
             }
-        }        
+        }
     }
     
     private Packet packetManager (Packet p, String ip) { 
-        // return Packet to p.getReceiver()        
+        // return Packet to p.getReceiver()
         
         switch (p.getAction()) {
             case 1:                
@@ -83,12 +90,14 @@ public class Server extends Thread {
                     // p.getSender() join conversation
                     this.idip.put(p.getSender(), ip);
                     this.msgToSend.put(p.getSender(), new ArrayList<Message>());
+                    this.msgSent.put(p.getSender(), 0);
                     return new Packet("SERVER", p.getSender(), null, null, 3);
                 }
             case 2:
                 // p.getSender() leave conversation
                 if (this.idip.remove(p.getSender()) != null) {
                     // successfully
+                    msgSent.remove(p.getSender());
                     return new Packet("SERVER", p.getSender(), null, null, 6);
                 }
                 else {
@@ -96,36 +105,63 @@ public class Server extends Thread {
                     return new Packet("SERVER", p.getSender(), null, null, -1);
                 }
             default:                
-                if (this.idip.get(p.getSender()).equals(ip)) {
+                if (this.idip.containsKey(p.getSender()) && this.idip.get(p.getSender()).equals(ip)) {
                     // sender-name match with ip
-                    if (p.getData() != null) {
-                        // p.getSender() send new messages
-                        for (Message m : p.getData()) {
-                            // new messages are stored in 'msgToSend' and wait 'receiver'                                                           
-                            String receiver = m.getReceiver();
-                            if (this.idip.containsKey(receiver)) {
-                                // receiver exists
-                                ArrayList<Message> msgs = this.msgToSend.get(receiver);                                
-                                msgs.add(m);
+                                        
+                    if (peopleToKick.contains(p.getSender())) {
+                        // kick people in the arrayList
+                        this.idip.remove(p.getSender());
+                        return new Packet("SERVER", p.getSender(), null, null, 8);
+                    }
+                    else {
+                        if (p.getData() != null) {
+                            // p.getSender() send new messages
+                            for (Message m : p.getData()) {
+                                // msgSent is increased 
+                                int totalMessages = msgSent.get(m.getSender());
+                                totalMessages ++;
+                                msgSent.put(m.getSender(), totalMessages);
 
-                                this.msgToSend.put(receiver, msgs);
-                            }                            
-                        }                                            
+                                // new messages are stored in 'msgToSend' and wait 'receiver'                                                           
+                                String receiver = m.getReceiver();
+
+                                if (receiver.equals("ALL")) {
+                                    // message for 'ALL' chat, the global chat
+                                    // the message will reach everyone
+                                    for (String name : msgToSend.keySet()) {
+                                        if (!m.getSender().equals(name)) {
+                                            ArrayList<Message> tmp = this.msgToSend.get(name);                                
+                                            tmp.add(m);
+
+                                            this.msgToSend.put(name, tmp);
+                                        }
+                                    }
+                                }
+
+                                if (this.idip.containsKey(receiver)) {
+                                    // receiver exists
+                                    ArrayList<Message> msgs = this.msgToSend.get(receiver);                                
+                                    msgs.add(m);
+
+                                    this.msgToSend.put(receiver, msgs);
+                                }
+                            }                                            
+                        }
+                        // send old messages to p.getSender() removing it and adding a new, empty ArrayList
+                        ArrayList<Message> oldMessages = this.msgToSend.remove(p.getSender());
+
+                        this.msgToSend.put(p.getSender(), new ArrayList<Message>());
+
+                        TreeSet<String> onlinePeople = null;
+
+                        // client ask for online people
+                        if (p.getAction() == 7) {
+                            onlinePeople = new TreeSet<>();
+                            onlinePeople.addAll(this.idip.keySet());
+                        }
+
+                        return new Packet("SERVER", p.getSender(), oldMessages, onlinePeople, 0);
                     }
-                    // send old messages to p.getSender() removing it and adding a new, empty ArrayList
-                    ArrayList<Message> oldMessages = this.msgToSend.remove(p.getSender());
-                    
-                    this.msgToSend.put(p.getSender(), new ArrayList<Message>());
-                    
-                    TreeSet<String> onlinePeople = null;
-                    
-                    // client ask for online people
-                    if (p.getAction() == 7) {
-                        onlinePeople = new TreeSet<>();
-                        onlinePeople.addAll(this.idip.keySet());
-                    }
-                    
-                    return new Packet("SERVER", p.getSender(), oldMessages, onlinePeople, 0);
                 }
                 else {
                     // sender-name doesen't match with ip
@@ -142,13 +178,21 @@ public class Server extends Thread {
         // Key: clientName ; value: number of messages
         
         HashMap<String, Integer> result = new HashMap<>();
-        HashMap<String, ArrayList<Message>> tmp = this.msgToSend;
+        ConcurrentHashMap<String, ArrayList<Message>> tmp = this.msgToSend;
         
         for (String name : tmp.keySet()) {
             result.put(name, tmp.get(name).size());
         }
         
         return result;
+    }
+    
+    public HashMap<String, Integer> getMsgSent () {
+        return this.msgSent;
+    }
+    
+    public void setPeopleToKick (ArrayList<String> kp) {
+        this.peopleToKick = kp;
     }
     
     public String getInfo () {

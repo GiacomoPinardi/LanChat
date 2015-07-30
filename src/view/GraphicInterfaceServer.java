@@ -4,6 +4,7 @@ package view;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 
@@ -16,8 +17,11 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
     private boolean canUpdate;
     
     // manage clipboard
-    Clipboard clipboard;
-    StringSelection selection;
+    private Clipboard clipboard;
+    private StringSelection selection;
+    
+    // contains people kicked from server
+    private ArrayList<String> kickedPeople;
     
     public GraphicInterfaceServer() {
         initComponents();        
@@ -25,6 +29,8 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         
         this.online = true;
         this.canUpdate = true;
+        
+        kickedPeople = new ArrayList<>();
         
         clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     }
@@ -45,6 +51,7 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jToggleButton1 = new javax.swing.JToggleButton();
         jToggleButton2 = new javax.swing.JToggleButton();
+        jToggleButton3 = new javax.swing.JToggleButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -63,7 +70,7 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         jLabel2.setText("Ip:");
 
         jLabel3.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        jLabel3.setText("Messages:");
+        jLabel3.setText("Msg to send/sent:");
 
         jToggleButton1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
         jToggleButton1.setText("Copy Name");
@@ -80,6 +87,15 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         jToggleButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jToggleButton2ActionPerformed(evt);
+            }
+        });
+
+        jToggleButton3.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        jToggleButton3.setText("Kick");
+        jToggleButton3.setFocusable(false);
+        jToggleButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButton3ActionPerformed(evt);
             }
         });
 
@@ -114,24 +130,25 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jToggleButton1)
+                .addGap(37, 37, 37)
+                .addComponent(jToggleButton2)
+                .addGap(43, 43, 43)
+                .addComponent(jToggleButton3)
+                .addContainerGap(46, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(43, 43, 43)
                         .addComponent(jLabel1)
                         .addGap(102, 102, 102)
                         .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 64, Short.MAX_VALUE)
-                        .addComponent(jLabel3)
-                        .addGap(13, 13, 13))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel3))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jScrollPane1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jToggleButton1)
-                        .addGap(37, 37, 37)
-                        .addComponent(jToggleButton2)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(jScrollPane1)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -140,7 +157,8 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jToggleButton1)
-                    .addComponent(jToggleButton2))
+                    .addComponent(jToggleButton2)
+                    .addComponent(jToggleButton3))
                 .addGap(7, 7, 7)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -186,6 +204,7 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
             // toggle button pressed
             
             jToggleButton2.setEnabled(false);
+            jToggleButton3.setEnabled(false);
             this.setEnabledComponent(false);
             this.canUpdate = false;
         }
@@ -210,6 +229,7 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
             }
             
             jToggleButton2.setEnabled(true);
+            jToggleButton3.setEnabled(true);
             this.setEnabledComponent(true);
             this.canUpdate = true;
         }
@@ -220,6 +240,7 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
             // toggle button pressed
             
             jToggleButton1.setEnabled(false);
+            jToggleButton3.setEnabled(false);
             this.setEnabledComponent(false);
             this.canUpdate = false;
         }
@@ -244,10 +265,45 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
             }
             
             jToggleButton1.setEnabled(true);
+            jToggleButton3.setEnabled(true);
             this.setEnabledComponent(true);
             this.canUpdate = true;
         }
     }//GEN-LAST:event_jToggleButton2ActionPerformed
+
+    private void jToggleButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton3ActionPerformed
+        if (jToggleButton3.isSelected()) {
+            // toggle button pressed
+            
+            jToggleButton1.setEnabled(false);
+            jToggleButton2.setEnabled(false);
+            this.setEnabledComponent(false);
+            this.canUpdate = false;
+        }
+        else {
+            // toggle button released
+            if (jList1.getSelectedIndex() != -1) {
+                if (jList1.getMaxSelectionIndex() - jList1.getMinSelectionIndex() == 0) {  
+                    String s = (String) jList1.getSelectedValue();
+                    String data[] = s.replace(" ", "").split(String.valueOf((char) 007));
+                    kickedPeople.add(data[0]);
+                }
+                else {
+                    // two or more selected
+                    JOptionPane.showMessageDialog(rootPane, "Please select ONE item!", "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            else {
+                // no one selected
+                JOptionPane.showMessageDialog(rootPane, "Please select one item from the list!", "ERROR", JOptionPane.ERROR_MESSAGE);
+            }
+            
+            jToggleButton1.setEnabled(true);
+            jToggleButton2.setEnabled(true);
+            this.setEnabledComponent(true);
+            this.canUpdate = true;
+        }
+    }//GEN-LAST:event_jToggleButton3ActionPerformed
     
     private void setEnabledComponent (boolean b) {
         jMenu1.setEnabled(b);
@@ -268,6 +324,10 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         }
         
         jList1.setListData(v);
+    }
+    
+    public ArrayList<String> getKickedPeople () {
+        return kickedPeople;
     }
     
     public boolean isOnline () {
@@ -291,5 +351,6 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JToggleButton jToggleButton2;
+    private javax.swing.JToggleButton jToggleButton3;
     // End of variables declaration//GEN-END:variables
 }

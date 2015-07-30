@@ -30,16 +30,15 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     
     private JFileChooser fileChooser;
     
+    // true: you have been kicked
+    private boolean kicked;
+    
     public GraphicInterfaceClient(String clientName) {
         initComponents();
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         
         this.conversations = new HashMap<>();        
-        /*  
-        JTextArea jta = new JTextArea();
-        jta.setEditable(false);
-        jTabbedPane1.addTab("All", jta);
-        */
+        
         this.forServer = new PacketQueue();
         
         this.online = true;
@@ -49,6 +48,8 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         this.canUpdateOnlinePeopleList = true;
         
         this.fileChooser = new JFileChooser();
+        
+        this.kicked = false;
         
         // enter key will push 'send' button
         rootPane.setDefaultButton(jButton2);
@@ -115,7 +116,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
 
         jMenu1.setText("Action");
 
-        jMenuItem2.setText("Close conversation");
+        jMenuItem2.setText("Close chat");
         jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem2ActionPerformed(evt);
@@ -193,21 +194,21 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.LEADING))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(34, 34, 34)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel2))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
+                            .addComponent(jTextField1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jToggleButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap())
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -224,7 +225,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
                 .addContainerGap())
@@ -234,10 +235,16 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        int r = JOptionPane.showConfirmDialog(rootPane, "Are you sure?\nAll unsaved conversations will be lost!", "Quit?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (!kicked) {
+            int r = JOptionPane.showConfirmDialog(rootPane, "Are you sure?\nAll unsaved conversations will be lost!", "Quit?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         
-        // 'online' is a boolean variable that other class check to ensure that client interface is on        
-        if (r == 0) {
+            // 'online' is a boolean variable that other class check to ensure that client interface is on        
+            if (r == 0) {
+                this.online = false;                
+                this.dispose();
+            }
+        }
+        else {
             this.online = false;
             this.dispose();
         }
@@ -341,37 +348,53 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                 onlineUpdater = true;
             }
             
-            if (p.getData() != null) {
+            if (p.getData() != null) {                
                 // new messages saved in conversations
-                for (Message m : p.getData()) {
-                    String sender = m.getSender();
+                for (Message m : p.getData()) {                    
+                    String name = m.getSender();
                     Conversation c;
                     
-                    int indexConversation = this.tabbedPaneContains(sender);                    
+                    // if message are global, it will be put in the chat called 'ALL'
+                    if (m.getReceiver().equals("ALL")) {
+                        name = "ALL";
+                    }
                     
-                    if (conversations.containsKey(sender)) {
+                    int indexConversation = this.tabbedPaneContains(name);                    
+                    
+                    if (conversations.containsKey(name)) {
                         // exists conversation
-                        c = conversations.get(sender);
+                        c = conversations.get(name);
                         
                         if (indexConversation == -1) {
                             // conversation isn't shown
-                            jTabbedPane1.addTab(sender, new JScrollPane(c.getTextArea()));
+                            jTabbedPane1.addTab(name, new JScrollPane(c.getTextArea()));
                         }
                     }
                     else {
                         // new conversation
-                        c = new Conversation(sender);
-                        jTabbedPane1.addTab(sender, new JScrollPane(c.getTextArea()));
+                        c = new Conversation(name);
+                        jTabbedPane1.addTab(name, new JScrollPane(c.getTextArea()));
                     }
                     // message is added                     
                     c.addMsg(m);
-                    conversations.put(sender, c);
+                    conversations.put(name, c);
                 }
+            }
+            else if (p.getAction() == 5) {
+                if (!kicked) {
+                    this.setConsoleText(false, "Client name doesen't match with ip! Try to exit and reconnect.");
+                }                
+            }
+            else if (p.getAction() == 8) {
+                kicked = true;
+                this.setConsoleText(false, "You have been kicked from server! Try to exit and reconnect.");
+                JOptionPane.showMessageDialog(rootPane, "You have been kicked!\nTry to exit and reconnect.", "Kicked!", JOptionPane.WARNING_MESSAGE);
             }
         }
         
         if (onlineUpdater) {        
             onlinePeople.remove(this.clientName);
+            onlinePeople.add("ALL");
             this.updateOnlinePeopleList(onlinePeople);
         }
         
@@ -540,7 +563,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             // all online people are showed
             jList1.setListData(Worker.SetToVector(onlinePeople));
         }        
-        jLabel2.setText("Online: " + (onlinePeople.size() + 1));
+        jLabel2.setText("Online: " + (onlinePeople.size()));
     }
     
     public void setConsoleText (boolean type, String text) {
@@ -553,10 +576,14 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         else {
             jLabel1.setForeground(Color.RED);
         }
-    }               
+    }    
     
     public boolean isOnline () {
         return this.online;
+    }
+    
+    public boolean isKicked () {
+        return this.kicked;
     }
        
     // Variables declaration - do not modify//GEN-BEGIN:variables
