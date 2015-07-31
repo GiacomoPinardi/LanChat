@@ -23,6 +23,8 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
     // contains people kicked from server
     private ArrayList<String> kickedPeople;
     
+    AboutInterface AI;
+    
     public GraphicInterfaceServer() {
         initComponents();        
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -30,9 +32,11 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         this.online = true;
         this.canUpdate = true;
         
-        kickedPeople = new ArrayList<>();
+        this.kickedPeople = new ArrayList<>();
         
-        clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        this.clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        
+        this.AI = new AboutInterface();
     }
 
     /**
@@ -57,6 +61,8 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem2 = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -122,6 +128,18 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
         jMenu2.add(jMenuItem2);
 
         jMenuBar1.add(jMenu2);
+
+        jMenu3.setText("About");
+
+        jMenuItem3.setText("About LanChat");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItem3);
+
+        jMenuBar1.add(jMenu3);
 
         setJMenuBar(jMenuBar1);
 
@@ -304,12 +322,15 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
             this.canUpdate = true;
         }
     }//GEN-LAST:event_jToggleButton3ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        AI.setVisible(true);
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
     
     private void setEnabledComponent (boolean b) {
         jMenu1.setEnabled(b);
         jMenu2.setEnabled(b);
-        jMenuItem1.setEnabled(b);
-        jMenuItem2.setEnabled(b);
+        jMenu3.setEnabled(b);
     }
     
     public void updateWindow (String[][] data) {
@@ -345,9 +366,11 @@ public class GraphicInterfaceServer extends javax.swing.JFrame {
     private javax.swing.JList jList1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JToggleButton jToggleButton2;

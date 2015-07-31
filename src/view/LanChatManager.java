@@ -8,16 +8,17 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import control.ClientManager;
 import control.ServerManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class LanChatManager extends javax.swing.JFrame {
 
     private GraphicInterfaceClient GIC;
+    private AboutInterface AI;
     
     public LanChatManager() {
         initComponents();        
         this.setTitle("LanChat Manager");
+        
+        this.AI = new AboutInterface();
         
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         // enter key will push 'start' button
@@ -47,6 +48,9 @@ public class LanChatManager extends javax.swing.JFrame {
         jRadioButton2 = new javax.swing.JRadioButton();
         jButton5 = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -103,6 +107,20 @@ public class LanChatManager extends javax.swing.JFrame {
                 jButton5ActionPerformed(evt);
             }
         });
+
+        jMenu1.setText("About");
+
+        jMenuItem1.setText("About LanChat");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
+        jMenuBar1.add(jMenu1);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -216,6 +234,10 @@ public class LanChatManager extends javax.swing.JFrame {
         jButton2.setEnabled(false);
     }//GEN-LAST:event_jRadioButton2ActionPerformed
 
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        AI.setVisible(true);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
     private void startClient () {
         if (Worker.ipChecker(jTextField2.getText())) {
             int port = Worker.checkPortNumber(jTextField3.getText());
@@ -298,6 +320,9 @@ public class LanChatManager extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JSeparator jSeparator1;
