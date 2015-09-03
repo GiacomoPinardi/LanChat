@@ -1,18 +1,34 @@
+/*
+ *
+ *  LanChat - Chat through your Local Area Network
+ *
+ *  Copyright (C) 2015  Giacomo Pinardi
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 package model;
 
+import control.Worker;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -196,42 +212,8 @@ public class Server extends Thread {
         this.peopleToKick = kp;
     }
     
-    public String getInfo () {
-        // store the local IPv4 (work also without internet)
-        String ip = "x.x.x.x";
-        
-        try {
-            // get all interface from pc network
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()){
-                // current element is the next interface
-                NetworkInterface currentInterface = interfaces.nextElement();
-                if (!currentInterface.isUp() || currentInterface.isLoopback() || currentInterface.isVirtual()) {
-                    // skip if the interface isn't 'good'
-                    continue;
-                }
-                // get all addresses from the current interface
-                Enumeration<InetAddress> addresses = currentInterface.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    InetAddress currentAddress = addresses.nextElement();
-                    if (currentAddress.isLoopbackAddress()) {
-                        // skip
-                        continue;
-                    }
-                    if (currentAddress instanceof Inet6Address) {
-                        // skip IPv6
-                        continue;
-                    }
-                    if (currentAddress instanceof Inet4Address)
-                        // IPv4 is stored
-                        ip = currentAddress.getHostAddress();
-                }
-            }
-        }
-        catch (IOException IOE) {
-            //
-        }
-        return ip + ":" + this.serverSocket.getLocalPort();
+    public String getInfo () {        
+        return Worker.getLocalIp() + ":" + this.serverSocket.getLocalPort();
     }
     
     public void setOffline () {

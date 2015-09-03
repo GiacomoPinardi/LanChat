@@ -1,3 +1,23 @@
+/*
+ *
+ *  LanChat - Chat through your Local Area Network
+ *
+ *  Copyright (C) 2015  Giacomo Pinardi
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 package view;
 
@@ -243,33 +263,35 @@ public class LanChatManager extends javax.swing.JFrame {
             int port = Worker.checkPortNumber(jTextField3.getText());
             if (port != -1) {
                 String name = jTextField1.getText();
-                if (!name.contains(" ")) {
-                    if (name.length() <= 14) {
-                        if (!name.equals("ALL")) {
-                            if (name.equals("")) {
-                                jTextField1.setText(Worker.randomName());
-                            }
-                            // all fields are correct, new client is created
-                            Client c = new Client(jTextField1.getText(), jTextField2.getText(), port);
+                int result = Worker.checkClientName(name);
+                
+                switch (result) {
+                    case 5:
+                        jTextField1.setText(Worker.randomName());
+                    case 0:
+                        // all fields are correct, new client is created
+                        Client c = new Client(jTextField1.getText(), jTextField2.getText(), port);
 
-                            // ClientManager manage client and send/ask server new messages
-                            ClientManager CM = new ClientManager(c);
+                        // ClientManager manage client and send/ask server new messages
+                        ClientManager CM = new ClientManager(c);
 
-                            // CM try to start client, if client work correctly CM run a thread that periodically check server
-                            if (CM.showClientInterface()) {
-                                CM.start();
-                            }
+                        // CM try to start client, if client work correctly CM run a thread that periodically check server
+                        if (CM.showClientInterface()) {
+                            CM.start();
                         }
-                        else {
-                            JOptionPane.showMessageDialog(rootPane, "'ALL' is a reserved name!\nTry using 'all'.", "ERROR", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                    else {
+                        break;
+                    case 1:
+                        JOptionPane.showMessageDialog(rootPane, "Name cannot contain spaces!", "ERROR", JOptionPane.ERROR_MESSAGE);
+                        break;
+                    case 2:
                         JOptionPane.showMessageDialog(rootPane, "Name too long!\nMaximium 14 letters.", "ERROR", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-                else {
-                    JOptionPane.showMessageDialog(rootPane, "Name cannot contain spaces!", "ERROR", JOptionPane.ERROR_MESSAGE);
+                        break;
+                    case 3:
+                        JOptionPane.showMessageDialog(rootPane, "'ALL' is a reserved name!\nTry using 'all'.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                        break;
+                    case 4:
+                        JOptionPane.showMessageDialog(rootPane, "Name must contain only letters!", "ERROR", JOptionPane.ERROR_MESSAGE);
+                        break;
                 }
             }
             else {
