@@ -111,6 +111,7 @@ public class Server extends Thread {
                     if (peopleToKick.contains(p.getSender())) {
                         // kick people in the arrayList
                         this.idip.remove(p.getSender());
+                        peopleToKick.remove(p.getSender());
                         return new Packet("SERVER", p.getSender(), null, null, 8);
                     }
                     else {

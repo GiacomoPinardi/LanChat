@@ -33,7 +33,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     // true: you have been kicked
     private boolean kicked;
     
-    AboutInterface AI;
+    private AboutInterface AI;    
     
     public GraphicInterfaceClient(String clientName) {
         initComponents();
@@ -98,6 +98,11 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
         jTabbedPane1.setToolTipText("");
         jTabbedPane1.setFocusable(false);
         jTabbedPane1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        jTabbedPane1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTabbedPane1MouseClicked(evt);
+            }
+        });
 
         jButton2.setText("Send");
         jButton2.setFocusable(false);
@@ -333,6 +338,13 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
         AI.setVisible(true);
     }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jTabbedPane1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTabbedPane1MouseClicked
+        int currentIndex = jTabbedPane1.getSelectedIndex();            
+        if (currentIndex != -1) {
+            jTabbedPane1.setTitleAt(currentIndex, jTabbedPane1.getTitleAt(currentIndex).replace("# ", ""));
+        }
+    }//GEN-LAST:event_jTabbedPane1MouseClicked
      
     private void send () {
         if (!jTextField1.getText().equals("") && jTabbedPane1.getSelectedIndex() != -1) {
@@ -340,6 +352,11 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
             int indexPane = jTabbedPane1.getSelectedIndex();
             String sender = this.clientName;
             String receiver = jTabbedPane1.getTitleAt(indexPane);
+            
+            if (receiver.contains("# ")) {
+                receiver = receiver.replace("# ", "");
+            }
+            
             ArrayList<Message> al = new ArrayList<>();
             Message msg = new Message(sender, receiver, jTextField1.getText());
             al.add(msg);
@@ -370,7 +387,10 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                 onlineUpdater = true;
             }
             
-            if (p.getData() != null) {                
+            if (p.getData() != null) {
+                // will contain all the name of the new messages: this names will be shown with #
+                ArrayList<String> newChatNames = new ArrayList<>();
+                
                 // new messages saved in conversations
                 for (Message m : p.getData()) {                    
                     String name = m.getSender();
@@ -380,6 +400,8 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                     if (m.getReceiver().equals("ALL")) {
                         name = "ALL";
                     }
+                    
+                    newChatNames.add(name);
                     
                     int indexConversation = this.tabbedPaneContains(name);                    
                     
@@ -399,7 +421,22 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
                     }
                     // message is added                     
                     c.addMsg(m);
-                    conversations.put(name, c);
+                    conversations.put(name, c);                    
+                }
+                
+                int indexShowing = jTabbedPane1.getSelectedIndex();
+                String currentShowing = "";                
+                
+                if (indexShowing != -1) {
+                    currentShowing = jTabbedPane1.getTitleAt(indexShowing);
+                }                
+                for (String name : newChatNames) {
+                    if (!currentShowing.equals(name)) {
+                        int index = this.tabbedPaneContains(name);
+                        if (index != -1) {
+                            jTabbedPane1.setTitleAt(index,"# " + name);
+                        }
+                    }
                 }
             }
             else if (p.getAction() == 5) {
@@ -442,7 +479,7 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     private int tabbedPaneContains (String chatName) {
         // return index of chat if contains it, else return -1
         for (int i = 0; i < jTabbedPane1.getTabCount(); i++) {
-            if (chatName.equals(jTabbedPane1.getTitleAt(i))) {
+            if (chatName.equals(jTabbedPane1.getTitleAt(i).replace("# ", ""))) {
                 return i;
             }
         }        
