@@ -46,7 +46,7 @@ public class Client {
     public boolean connect () {
         try {
             // timeout should be increased for slow connection
-            int timeout = 10000;
+            int timeout = 15000;
             client = new Socket();            
             client.connect(new InetSocketAddress(this.serverName, port), timeout);
             //this.client = new Socket(this.serverName, this.port);

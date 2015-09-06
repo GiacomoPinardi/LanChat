@@ -28,6 +28,7 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import control.ClientManager;
 import control.ServerManager;
+import model.NetworkScanner;
 
 public class LanChatManager extends javax.swing.JFrame {
 
@@ -68,6 +69,7 @@ public class LanChatManager extends javax.swing.JFrame {
         jRadioButton2 = new javax.swing.JRadioButton();
         jButton5 = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
+        jButton3 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -128,6 +130,15 @@ public class LanChatManager extends javax.swing.JFrame {
             }
         });
 
+        jButton3.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        jButton3.setText("Scan");
+        jButton3.setFocusPainted(false);
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         jMenu1.setText("About");
 
         jMenuItem1.setText("About LanChat");
@@ -154,15 +165,6 @@ public class LanChatManager extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jSeparator1)
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton2)
-                .addGap(32, 32, 32))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(69, 69, 69)
                 .addComponent(jButton5)
@@ -170,19 +172,30 @@ public class LanChatManager extends javax.swing.JFrame {
                 .addComponent(jButton1)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
+                .addGap(53, 53, 53)
+                .addComponent(jRadioButton1)
+                .addGap(55, 55, 55)
+                .addComponent(jRadioButton2)
+                .addContainerGap(58, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(25, 25, 25)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel3)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(120, 120, 120)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(53, 53, 53)
-                        .addComponent(jRadioButton1)
-                        .addGap(55, 55, 55)
-                        .addComponent(jRadioButton2)))
-                .addContainerGap(58, Short.MAX_VALUE))
+                            .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addGap(32, 32, 32))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -201,7 +214,8 @@ public class LanChatManager extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(jLabel2)
+                    .addComponent(jButton3))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -231,7 +245,7 @@ public class LanChatManager extends javax.swing.JFrame {
             this.startClient();
         }
         else if (jRadioButton2.isSelected()) {
-            this.checkPortAndStart();
+            this.checkPortAndStartServer();
         }
         else {
             JOptionPane.showMessageDialog(rootPane, "Please choose an option!", "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -243,6 +257,7 @@ public class LanChatManager extends javax.swing.JFrame {
         jTextField2.setEditable(true);
         jTextField3.setEditable(true);
         jButton2.setEnabled(true);
+        jButton3.setEnabled(true);        
     }//GEN-LAST:event_jRadioButton1ActionPerformed
 
     private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
@@ -252,11 +267,16 @@ public class LanChatManager extends javax.swing.JFrame {
         jTextField3.setEditable(true);
         jTextField2.setEditable(false);
         jButton2.setEnabled(false);
+        jButton3.setEnabled(false);
     }//GEN-LAST:event_jRadioButton2ActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
         AI.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        this.scanNetwork();
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     private void startClient () {
         if (Worker.ipChecker(jTextField2.getText())) {
@@ -303,7 +323,7 @@ public class LanChatManager extends javax.swing.JFrame {
         }
     }
     
-    private void checkPortAndStart () {
+    private void checkPortAndStartServer () {
         int port = Worker.checkPortNumber(jTextField3.getText());
         if (port == -1) {
             JOptionPane.showMessageDialog(rootPane, "Wrong port syntax!", "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -314,6 +334,9 @@ public class LanChatManager extends javax.swing.JFrame {
                 this.startServer(port);
             }            
         }
+        else if (port == 9117) {
+            JOptionPane.showMessageDialog(rootPane, "Port 9117 is reserved for the LanChat multicast server.\nChoose another port please.", "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
         else {
             this.startServer(port);
         }
@@ -321,10 +344,10 @@ public class LanChatManager extends javax.swing.JFrame {
         
     private void startServer (int port) {
         // new server is created
-        try {
-            Server s = new Server(port);
+        try {            
+            Server s = new Server(port);     
             
-            ServerManager SM = new ServerManager(s);
+            ServerManager SM = new ServerManager(s); 
             
             SM.showServerInterface();
             SM.start();            
@@ -333,11 +356,17 @@ public class LanChatManager extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, "Cannot create new server!\nInput/Output Exception", "ERROR", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
+    private void scanNetwork () {        
+        NetworkScanner ns = new NetworkScanner(rootPane, jTextField2);        
+        ns.start();        
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

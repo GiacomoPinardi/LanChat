@@ -24,16 +24,19 @@ package control;
 import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import model.MulticastServer;
 import model.Server;
 import view.GraphicInterfaceServer;
 
 public class ServerManager extends Thread {
     
-    private Server server;
+    private Server server;    
+    private MulticastServer multicastServer;
     private GraphicInterfaceServer GIS;
     
     public ServerManager (Server server) {
         this.server = server;
+        this.multicastServer = new MulticastServer();
         this.GIS = new GraphicInterfaceServer();
     }
     
@@ -80,14 +83,16 @@ public class ServerManager extends Thread {
                 System.err.println("Interrupted Exception : " + IE.getLocalizedMessage());
             }
         }
-        
-        server.setOffline();
+                
+        this.multicastServer.setOffline();
+        this.server.setOffline();
     }
     
     public void showServerInterface() {
         GIS.setVisible(true);
         
         this.server.start();
+        this.multicastServer.start();
         
         GIS.setTitle("LanChat server: " + this.server.getInfo());
     }
