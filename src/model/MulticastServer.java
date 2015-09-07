@@ -29,29 +29,33 @@ import java.net.SocketException;
 
 public class MulticastServer extends Thread {
     
-    boolean stop;
+    private boolean stop;
     private int delay;
-    private int port;
+    // port in which the multicast server are sending information
+    private int portListening;
+    // port in which server are sending information, so this port is added to the message of multicast server
+    private int portMessage;
 
-    public MulticastServer() {
+    public MulticastServer(int portMessage) {
         this.stop = false;
         this.delay = 1500;
-        this.port = 9117;
+        this.portListening = 9117;
+        this.portMessage = portMessage;
     }
     
     @Override
     public void run() { 
         try {
-            DatagramSocket socket = new DatagramSocket(port);
+            DatagramSocket socket = new DatagramSocket(portListening);
 
             while (!stop) {
                 try {                
-                    String dString = "Hello Client!";                
+                    String dString = "Hello Client!_" + String.valueOf(portMessage);                
                     byte[] buf = dString.getBytes();
 
                     // send
                     InetAddress group = InetAddress.getByName("230.0.0.4");
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length, group, port);
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length, group, portListening);
                     socket.send(packet);
 
                     // sleep for a while                    

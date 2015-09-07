@@ -216,6 +216,10 @@ public class Server extends Thread {
         return Worker.getLocalIp() + ":" + this.serverSocket.getLocalPort();
     }
     
+    public int getPort () {
+        return this.serverSocket.getLocalPort();
+    }
+    
     public void setOffline () {
         try {
             this.online = false;

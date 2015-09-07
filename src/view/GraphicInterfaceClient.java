@@ -334,7 +334,9 @@ public class GraphicInterfaceClient extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        jTabbedPane1.remove(jTabbedPane1.getSelectedIndex());
+        if (jTabbedPane1.getSelectedIndex() != -1) {
+            jTabbedPane1.remove(jTabbedPane1.getSelectedIndex());
+        }        
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed

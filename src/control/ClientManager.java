@@ -23,6 +23,7 @@ package control;
 
 import model.Client;
 import javax.swing.JOptionPane;
+import javax.swing.JRootPane;
 import model.Packet;
 import model.PacketQueue;
 import view.GraphicInterfaceClient;
@@ -34,12 +35,15 @@ public class ClientManager extends Thread {
     
     private PacketQueue forServer;
     private PacketQueue forClient;
+    
+    private JRootPane rootPane;
         
-    public ClientManager(Client client) {
+    public ClientManager(Client client, JRootPane rootPane) {
         this.client = client;
         this.GIC = new GraphicInterfaceClient(this.client.getClientName());
         this.forServer = new PacketQueue();
         this.forClient = new PacketQueue();
+        this.rootPane = rootPane;
     }
     
     @Override
@@ -124,16 +128,16 @@ public class ClientManager extends Thread {
                 return true;
             }
             else if (r == 1) {
-                JOptionPane.showMessageDialog(GIC, "Duplicate name!\nChange Client name and retry.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(rootPane, "Duplicate name!\nChange Client name and retry.", "ERROR", JOptionPane.ERROR_MESSAGE);
                 GIC.dispose();
             }
             else {
-                JOptionPane.showMessageDialog(GIC, "Unknown error!\nPlease retry.", "ERROR", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(rootPane, "Unknown error!\nPlease retry.", "ERROR", JOptionPane.ERROR_MESSAGE);
                 GIC.dispose();
             }
         }
         else {
-            JOptionPane.showMessageDialog(GIC, "Server not found or wrong port number!", "ERROR", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(rootPane, "Server not found or wrong port number!", "ERROR", JOptionPane.ERROR_MESSAGE);
             GIC.dispose();
         }
         return false;

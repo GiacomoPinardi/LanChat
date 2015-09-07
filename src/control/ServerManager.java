@@ -36,7 +36,7 @@ public class ServerManager extends Thread {
     
     public ServerManager (Server server) {
         this.server = server;
-        this.multicastServer = new MulticastServer();
+        this.multicastServer = new MulticastServer(server.getPort());
         this.GIS = new GraphicInterfaceServer();
     }
     
