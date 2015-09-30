@@ -21,12 +21,10 @@
 
 package view;
 
-import model.Client;
 import model.Server;
 import control.Worker;
 import java.io.IOException;
 import javax.swing.JOptionPane;
-import control.ClientManager;
 import control.ServerManager;
 import model.ClientThread;
 import model.NetworkScanner;

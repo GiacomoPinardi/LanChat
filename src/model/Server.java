@@ -77,6 +77,8 @@ public class Server extends Thread {
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                 out.writeObject(r);
                 
+                out.flush();
+                
                 socket.close();
                 in.close();
                 out.close();

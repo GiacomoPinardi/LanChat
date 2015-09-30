@@ -82,11 +82,16 @@ public class Client {
             
             out.writeObject(packet);
             
+            out.flush();
+            
             // from server:
             InputStream inFromServer = client.getInputStream();            
             ObjectInputStream in = new ObjectInputStream(inFromServer);
             
             Packet p = (Packet) in.readObject();
+            
+            out.close();
+            in.close();
             
             return p;
         }

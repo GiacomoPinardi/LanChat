@@ -21,7 +21,6 @@
 
 package view;
 
-import java.io.File;
 import java.io.IOException;
 import static java.lang.ClassLoader.getSystemResource;
 import javax.imageio.ImageIO;
